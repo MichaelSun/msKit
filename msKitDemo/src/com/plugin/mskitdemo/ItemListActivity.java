@@ -17,7 +17,7 @@ import android.support.v4.app.FragmentActivity;
  * {@link ItemDetailFragment}.
  * <p>
  * This activity also implements the required {@link ItemListFragment.Callbacks}
- * interface to listen for item selections.
+ * interfaces to listen for item selections.
  */
 public class ItemListActivity extends FragmentActivity implements ItemListFragment.Callbacks {
 

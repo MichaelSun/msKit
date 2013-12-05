@@ -1,23 +1,5 @@
-package com.plugin.internet.core.impl;
+package com.plugin.internet.impl;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.UnrecoverableKeyException;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
 import org.apache.http.conn.scheme.HostNameResolver;
 import org.apache.http.conn.scheme.LayeredSocketFactory;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
@@ -26,6 +8,14 @@ import org.apache.http.conn.ssl.StrictHostnameVerifier;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+
+import javax.net.ssl.*;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.security.*;
 
 /**
  * 信任所有安全证书， 根据apache SSLSocketFactory修改
@@ -128,8 +118,8 @@ public class EasySSLSocketFactory implements LayeredSocketFactory {
 	 * exclusively to instantiate the factory for {@link #getSocketFactory
 	 * getSocketFactory}.
 	 * 
-	 * @throws KeyManagementException
-	 * @throws NoSuchAlgorithmException
+	 * @throws java.security.KeyManagementException
+	 * @throws java.security.NoSuchAlgorithmException
 	 */
 	private EasySSLSocketFactory() throws NoSuchAlgorithmException,
 			KeyManagementException {

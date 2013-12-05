@@ -17,13 +17,13 @@ public interface ExtUtil {
      */
     ErrorType getErrorType();
     /*
-     * This interface get all the dir name under the path path argument is the
+     * This interfaces get all the dir name under the path path argument is the
      * relative path for the theme, should end with the system file split
      */
 	Set<String> getChildDirs(String path);
 
 	/*
-	 * This interface get all the file name under the path path argument is the
+	 * This interfaces get all the file name under the path path argument is the
 	 * relative path for the theme, should end with the system file split
 	 */
 	Set<String> getChildFiles(String path);

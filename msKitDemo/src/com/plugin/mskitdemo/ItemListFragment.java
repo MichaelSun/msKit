@@ -16,7 +16,7 @@ import com.plugin.mskitdemo.dummy.DummyContent;
  * {@link ItemDetailFragment}.
  * <p>
  * Activities containing this fragment MUST implement the {@link Callbacks}
- * interface.
+ * interfaces.
  */
 public class ItemListFragment extends ListFragment {
 
@@ -38,7 +38,7 @@ public class ItemListFragment extends ListFragment {
     private int mActivatedPosition = ListView.INVALID_POSITION;
 
     /**
-     * A callback interface that all activities containing this fragment must
+     * A callback interfaces that all activities containing this fragment must
      * implement. This mechanism allows activities to be notified of item
      * selections.
      */
@@ -50,7 +50,7 @@ public class ItemListFragment extends ListFragment {
     }
 
     /**
-     * A dummy implementation of the {@link Callbacks} interface that does
+     * A dummy implementation of the {@link Callbacks} interfaces that does
      * nothing. Used only when this fragment is not attached to an activity.
      */
     private static Callbacks sDummyCallbacks = new Callbacks() {
@@ -101,7 +101,7 @@ public class ItemListFragment extends ListFragment {
     public void onDetach() {
         super.onDetach();
 
-        // Reset the active callbacks interface to the dummy implementation.
+        // Reset the active callbacks interfaces to the dummy implementation.
         mCallbacks = sDummyCallbacks;
     }
 
@@ -109,7 +109,7 @@ public class ItemListFragment extends ListFragment {
     public void onListItemClick(ListView listView, View view, int position, long id) {
         super.onListItemClick(listView, view, position, id);
 
-        // Notify the active callbacks interface (the activity, if the
+        // Notify the active callbacks interfaces (the activity, if the
         // fragment is attached to one) that an item has been selected.
         mCallbacks.onItemSelected(DummyContent.ITEMS.get(position).id);
     }
