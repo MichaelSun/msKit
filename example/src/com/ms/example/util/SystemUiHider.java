@@ -162,7 +162,7 @@ public abstract class SystemUiHider {
     };
 
     /**
-     * A callback interface used to listen for system UI visibility changes.
+     * A callback interfaces used to listen for system UI visibility changes.
      */
     public interface OnVisibilityChangeListener {
         /**
