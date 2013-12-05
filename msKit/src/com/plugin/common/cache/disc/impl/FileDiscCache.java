@@ -46,13 +46,18 @@ public class FileDiscCache extends BasicDiscCache<File> {
 	@Override
 	public File get(String key) {
 		String fileName = fileNameGenerator.generate(key);
-		return new File(discDir, fileName);
+		File file = new File(discDir, fileName);
+		if(file.exists()){
+			updateInfoWithGet(file);
+		}
+		return file;
 	}
 	
 	@Override
 	public String put(String key, File src) {
 		return null;
 	}
+
 	
 	
 

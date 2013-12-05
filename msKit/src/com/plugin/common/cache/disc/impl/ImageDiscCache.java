@@ -69,6 +69,8 @@ public class ImageDiscCache extends BasicDiscCache<Bitmap> {
             return null;
         }
 		
+		updateInfoWithGet(bmpFile);
+		
 		Bitmap bmp = DisCacheUtil.loadBitmapWithSizeOrientation(bmpFile);
 		
 		 if (LogUtil.UTILS_DEBUG) {
@@ -76,5 +78,6 @@ public class ImageDiscCache extends BasicDiscCache<Bitmap> {
 	        }
 	    return bmp;
 	}
+
 
 }

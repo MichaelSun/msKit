@@ -64,6 +64,8 @@ public class ThumbnailCache extends BasicDiscCache<Bitmap>{
             return null;
         }
 		
+		updateInfoWithGet(bmpFile);
+		
 		Bitmap bmp = DisCacheUtil.loadBitmapWithSizeOrientation(bmpFile);
 		
 		 if (LogUtil.UTILS_DEBUG) {
