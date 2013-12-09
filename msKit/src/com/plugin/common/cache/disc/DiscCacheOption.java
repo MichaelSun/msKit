@@ -7,12 +7,25 @@ import com.plugin.common.cache.disc.naming.HashCodeFileNameGenerator;
 
 public class DiscCacheOption {
 
-
+	public DiscCacheOption(String category, String discDir, FileNameGenerator nameGenerator) {
+		this.category = category;
+		this.disCachedir = discDir;
+		this.nameGenerator = nameGenerator;
+	}
+	
     
-	public static enum DiscCacheCategory{
-		DIR_FILE,
-		DIR_IMAGE,
-		DIR_THUMBNAIL,
+	public static String CATEGORY_FILE = "disc_cache_category_file";
+	
+	public static String CATEGORY_IMAGE = "disc_cache_category_image";
+	
+	private String category;
+	
+	public String getCategory() {
+		return category;
+	}
+	
+	public void setCategory(String category) {
+		this.category = category;
 	}
 	
 	/**
@@ -48,7 +61,7 @@ public class DiscCacheOption {
 	
 	
 	/**
-	 * disc Cache Size （unit by MB）
+	 * disc Cache Size （unit by MB）,default is 10MB
 	 */
 	public int discCacheSize = 10;
 	

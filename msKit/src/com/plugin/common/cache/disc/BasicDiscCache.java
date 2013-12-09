@@ -36,7 +36,10 @@ public abstract class BasicDiscCache<T> implements IDiscCache<T>{
 //		this(dir, new HashCodeFileNameGenerator());
 //	}
 	
-	public BasicDiscCache(File dir, FileNameGenerator nameGenerator, int discCacheSize){
+	public BasicDiscCache(DiscCacheOption option){
+		String dir = option.getDisCachedir();
+		FileNameGenerator nameGenerator = option.getNameGenerator();
+		int discCacheSize = option.getDiscCacheSize();
 		if(dir == null){
 			throw new IllegalArgumentException(String.format(ERROR_ARG_NULL, "dir"));
 		}
@@ -45,7 +48,7 @@ public abstract class BasicDiscCache<T> implements IDiscCache<T>{
 			throw new IllegalArgumentException(String.format(ERROR_ARG_NULL, "FileNameGenerator"));
 		}
 		
-		this.discDir = dir;
+		this.discDir = new File(dir);
 		this.fileNameGenerator = nameGenerator;
 		this.discCacheSizeLimit = discCacheSize;
 		this.cacheSize = new AtomicInteger();
