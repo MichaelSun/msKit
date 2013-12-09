@@ -9,7 +9,7 @@ import com.plugin.common.cache.disc.impl.ImageDiscCache;
 
 public class DiscCacheFactory {
 
-	public static DiscCacheFactory gDiscCacheMgr = null;
+	private static DiscCacheFactory gDiscCacheMgr = null;
 	
 	private Map<String,IDiscCache> discCaches = Collections.synchronizedMap(new HashMap<String, IDiscCache>());
 	
