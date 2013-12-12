@@ -2,10 +2,17 @@ package com.plugin.common.cache.memory;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import android.graphics.Bitmap;
 import android.text.TextUtils;
 
+import com.plugin.common.cache.disc.DiscCacheOption;
+import com.plugin.common.cache.memory.impl.BaseImageMemoryCache;
 import com.plugin.common.cache.memory.impl.FileMemoryCache;
 import com.plugin.common.cache.memory.impl.ImageMemoryCache;
 import com.plugin.common.cache.memory.impl.ThumbnailMemoryCache;
@@ -14,17 +21,24 @@ public class MemoryCacheManager {
 
 	private static MemoryCacheManager gMemoryCacheMgr = null;
 
-	private FileMemoryCache fileMemoryCache;
+	private Map<String, FileMemoryCache> fileMemoryCaches = Collections.synchronizedMap(new HashMap<String, FileMemoryCache>());
 
-	private ImageMemoryCache imageMemoryCache;
-
-	private ThumbnailMemoryCache thumbnailMemoryCache;
-
+	private Map<String, BaseImageMemoryCache> imageMemoryCaches = Collections.synchronizedMap(new HashMap<String, BaseImageMemoryCache>());
+	
+	private MemoryCacheOption mOption;
+	
+	
 	private MemoryCacheManager(MemoryCacheOption option) {
-		fileMemoryCache = FileMemoryCache.getInstance(option);
-		imageMemoryCache = ImageMemoryCache.getIntance(option);
-		thumbnailMemoryCache = ThumbnailMemoryCache.getIntance(option);
+		this.mOption = option;
+		if(option.getDiscCacheOptions() != null){
+			Iterator<Entry<String, DiscCacheOption>> discCachekeys = option.getDiscCacheOptions().entrySet().iterator();
+			while(discCachekeys.hasNext()){
+				Map.Entry<String, DiscCacheOption> discOption = discCachekeys.next();
+				
+			}
+		}
 	}
+	
 
 	public static MemoryCacheManager getIntance(MemoryCacheOption option) {
 		if (gMemoryCacheMgr == null) {
@@ -38,6 +52,8 @@ public class MemoryCacheManager {
 		return gMemoryCacheMgr;
 	}
 
+
+	
 	public boolean put(String category, String key, Object obj) {
 		if (!TextUtils.isEmpty(category) && obj != null) {
 			if(category.equals(MemoryCacheOption.MEMORY_CACHE_CATEGORY_FILE)){

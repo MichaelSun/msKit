@@ -1,5 +1,8 @@
 package com.plugin.common.cache.memory;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.plugin.common.cache.disc.DiscCacheOption;
 
 public class MemoryCacheOption {
@@ -30,7 +33,6 @@ public class MemoryCacheOption {
 	
 	public static final String MEMORY_CACHE_CATEGORY_IMAGE = "memory_cache_category_image";
 	
-	public static final String MEMORY_CACHE_CATEGORY_THUMBNAIL = "memory_cache_category_thumbnail";
 	
 	/**
 	 * 是否自动写disc
@@ -59,16 +61,8 @@ public class MemoryCacheOption {
 		this.autoFetchFromDisk = autoFetchFromDisk;
 	}
 	
-	
-	private DiscCacheOption discCacheOption;
-	
-	public DiscCacheOption getDiscCacheOption() {
-		return discCacheOption;
+	public enum ImageType{
+		RAW, LOW, MEDIUM, HIGH, THUMBNAIL,
 	}
-	
-	public void setDiscCacheOption(DiscCacheOption discCacheOption) {
-		this.discCacheOption = discCacheOption;
-	}
-	
 	
 }

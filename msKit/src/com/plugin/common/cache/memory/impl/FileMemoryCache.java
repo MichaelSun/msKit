@@ -31,7 +31,6 @@ public class FileMemoryCache implements IMemoryCache<String, File>{
 	}
 	
 	
-	
 	private FileMemoryCache(MemoryCacheOption option) {
 		DiscCacheOption discCacheOption = option.getDiscCacheOption();
 		fileDiscCache = (FileDiscCache) DiscCacheFactory.getInstance().getDiscCache(discCacheOption);
