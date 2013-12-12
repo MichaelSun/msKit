@@ -18,20 +18,20 @@ public class FileMemoryCache implements IMemoryCache<String, File>{
 	
 	private MemoryCacheOption mOption;
 	
-	public static FileMemoryCache getInstance(MemoryCacheOption option){
-		if(gFileMemoryCache == null){
-			synchronized (FileMemoryCache.class) {
-				if(gFileMemoryCache == null){
-					return new FileMemoryCache(option);
-				}
-			}
-		}
-		
-		return gFileMemoryCache;
-	}
+//	public static FileMemoryCache getInstance(MemoryCacheOption option){
+//		if(gFileMemoryCache == null){
+//			synchronized (FileMemoryCache.class) {
+//				if(gFileMemoryCache == null){
+//					return new FileMemoryCache(option);
+//				}
+//			}
+//		}
+//		
+//		return gFileMemoryCache;
+//	}
 	
 	
-	private FileMemoryCache(MemoryCacheOption option) {
+	public FileMemoryCache(MemoryCacheOption option) {
 		DiscCacheOption discCacheOption = option.getDiscCacheOption();
 		fileDiscCache = (FileDiscCache) DiscCacheFactory.getInstance().getDiscCache(discCacheOption);
 		this.mOption = option;

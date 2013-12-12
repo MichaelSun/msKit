@@ -62,7 +62,18 @@ public class MemoryCacheOption {
 	}
 	
 	public enum ImageType{
-		RAW, LOW, MEDIUM, HIGH, THUMBNAIL,
+		RAW, SPECIAL
+	}
+	
+	
+	private DiscCacheOption discCacheOption;
+	
+	public DiscCacheOption getDiscCacheOption() {
+		return discCacheOption;
+	}
+	
+	public void setDiscCacheOption(DiscCacheOption discCacheOption) {
+		this.discCacheOption = discCacheOption;
 	}
 	
 }
