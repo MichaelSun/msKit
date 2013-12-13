@@ -11,10 +11,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.plugin.common.cache.image.BitmapDiskTools;
 import com.plugin.common.utils.SingleInstanceBase.SingleInstanceManager;
-import com.plugin.common.utils.files.DiskManager;
-import com.plugin.common.utils.files.DiskManager.DiskCacheType;
 
 /**
  * @author Guoqing Sun Mar 11, 20133:08:25 PM
@@ -63,7 +60,6 @@ public class UtilsConfig {
             DISK_DIR_PATH_BINDING = Environment.getExternalStorageDirectory() + "/." + CURRENT_PACKAGE_NAME_BINDING + "/";
             DISK_TMP_DIR_PATH_BINDING = Environment.getExternalStorageDirectory() + "/." + CURRENT_PACKAGE_NAME_BINDING + ".tmp/";
             DISK_LOG_PATH_BINDING = Environment.getExternalStorageDirectory() + "/." + CURRENT_PACKAGE_NAME_BINDING + "/";
-            BitmapDiskTools.init(DiskManager.tryToFetchCachePathByTypeBinding(DiskCacheType.PICTURE));
             
             SingleInstanceManager.getInstance().init(context.getApplicationContext());
             UtilsConfig.DEVICE_INFO = new DeviceInfo(context.getApplicationContext());

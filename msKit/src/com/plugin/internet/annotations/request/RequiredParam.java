@@ -5,12 +5,12 @@
 
 package com.plugin.internet.annotations.request;
 
-import com.plugin.internet.core.RequestBase;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import com.plugin.internet.interfaces.RequestBase;
 
 /**
  * 

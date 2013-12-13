@@ -39,7 +39,10 @@ public class MemoryCacheOption {
 	public static final String IMAGE_CACHE_CATEGORY_THUMB = "image_cache_category_thumb";
 	public static final String IMAGE_CACHE_CATEGORY_SMALL = "image_cache_category_small";
 
-
+	public static final String IMAGE_CACHE_CATEGORY_USER_HEAD_ROUNDED_DIR = "";
+	public static final String IMAGE_CACHE_CATEGORY_RAW_DIR = "";
+	public static final String IMAGE_CACHE_CATEGORY_THUMB_DIR = "";
+	public static final String IMAGE_CACHE_CATEGORY_SMALL_DIR = "";
 
 	private Map<String, DiscCacheOption> discCaches = new HashMap<String, DiscCacheOption>();
 
