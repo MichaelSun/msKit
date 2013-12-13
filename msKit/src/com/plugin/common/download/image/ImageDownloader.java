@@ -1,14 +1,19 @@
 package com.plugin.common.download.image;
 
+import java.io.File;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.text.TextUtils;
 
+import com.plugin.common.cache.memory.ImageMemoryCacheManager;
+import com.plugin.common.download.DownloaderOption;
 import com.plugin.common.download.FileDownloader;
-import com.plugin.common.download.HttpRequestHookListener;
+import com.plugin.common.download.utils.DownloaderUtils;
 import com.plugin.common.utils.Destroyable;
 import com.plugin.common.utils.SingleInstanceBase;
 import com.plugin.common.utils.UtilsConfig;
+import com.plugin.internet.interfaces.HttpRequestHookListener;
 
 /**
  * 用于后台获取图片，默认使用RRThreadPool作为服务线程，当队列中的服务已经完成以后，等待
@@ -110,21 +115,29 @@ public class ImageDownloader extends FileDownloader implements Runnable, Destroy
 
     }
 
-    private ICacheManager<Bitmap> mCacheManager;
-
-    public static ImageDownloader getInstance(Context context) {
-        return SingleInstanceBase.getInstance(ImageDownloader.class);
+    private ImageMemoryCacheManager imageCacheMgr;
+        
+    private static ImageDownloader mInstance;
+    
+    public static ImageDownloader getInstance(Context context, DownloaderOption option){
+    	if(mInstance == null){
+    		synchronized (ImageDownloader.class) {
+				if(mInstance == null){
+					mInstance = new ImageDownloader(context, option);
+				}
+			}
+    	}
+    	
+    	return mInstance;
     }
-
-    protected ImageDownloader() {
-        super();
+    
+    private ImageDownloader(Context context, DownloaderOption option){
+    	super(context,option);
+    	if(option.getMemoryOption() != null){
+    		imageCacheMgr = ImageMemoryCacheManager.getIntance(option.getMemoryOption());
+    	}
     }
-
-    @Override
-    protected void init(Context context) {
-        super.init(context);
-        mCacheManager = CacheFactory.getCacheManager(CacheFactory.TYPE_CACHE.TYPE_IMAGE);
-    }
+    
 
     @Override
     protected DownloadResponse tryToHandleDownloadFile(String downloadLocalPath, DownloadRequest requestOrg) {
@@ -138,23 +151,22 @@ public class ImageDownloader extends FileDownloader implements Runnable, Destroy
                 }
 
                 if (request.mBitmapOperationListener != null) {
-                    mCacheManager.putResource(DEFAULT_RAW_IMAGE_CATEGORY, request.getmDownloadUrl(), downloadLocalPath);
-                    Bitmap downloadBt = mCacheManager.getResource(DEFAULT_RAW_IMAGE_CATEGORY, request.getmDownloadUrl());
+                    imageCacheMgr.put(DEFAULT_RAW_IMAGE_CATEGORY, request.getmDownloadUrl(), downloadLocalPath);
+                    Bitmap downloadBt = imageCacheMgr.get(DEFAULT_RAW_IMAGE_CATEGORY, request.getmDownloadUrl());
                     if (downloadBt != null) {
                         bt = request.mBitmapOperationListener.onAfterBitmapDownload(downloadBt);
                         if (bt != null) {
-                            mCacheManager.putResource(request.mCategory, request.getmDownloadUrl(), bt);
+                            imageCacheMgr.put(request.mCategory, request.getmDownloadUrl(), bt);
                         }
-
-                        mCacheManager.releaseResource(DEFAULT_RAW_IMAGE_CATEGORY, request.getmDownloadUrl());
+                        imageCacheMgr.remove(DEFAULT_RAW_IMAGE_CATEGORY, request.getmDownloadUrl());
                         if (downloadBt != null && !downloadBt.isRecycled()) {
                             downloadBt.recycle();
                             downloadBt = null;
                         }
                     }
                 } else {
-                    localPath = mCacheManager.putResource(request.mCategory, request.getmDownloadUrl(), downloadLocalPath);
-                    bt = mCacheManager.getResource(request.mCategory, request.getmDownloadUrl());
+                    imageCacheMgr.put(DEFAULT_RAW_IMAGE_CATEGORY, request.getmDownloadUrl(), downloadLocalPath);
+                    Bitmap downloadBt = imageCacheMgr.get(DEFAULT_RAW_IMAGE_CATEGORY, request.getmDownloadUrl());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -164,7 +176,7 @@ public class ImageDownloader extends FileDownloader implements Runnable, Destroy
             }
         } else {
             try {
-                bt = ImageUtils.loadBitmapWithSizeOrientation(downloadLocalPath);
+                bt = DownloaderUtils.loadBitmapWithSizeOrientation(new File(downloadLocalPath));
             } catch (Exception e) {
                 e.printStackTrace();
                 if (DEBUG) {
@@ -184,7 +196,7 @@ public class ImageDownloader extends FileDownloader implements Runnable, Destroy
 
     @Override
     protected boolean checkInputStreamDownloadFile(String filePath) {
-        return ImageUtils.isBitmapData(filePath);
+        return DownloaderUtils.isBitmapData(filePath);
     }
 
 }

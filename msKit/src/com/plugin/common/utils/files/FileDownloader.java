@@ -1,4 +1,4 @@
-package com.plugin.common.download;
+package com.plugin.common.utils.files;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -16,21 +16,21 @@ import android.content.Context;
 import android.os.Handler;
 import android.text.TextUtils;
 
-import com.plugin.common.download.image.ImageDownloader;
 import com.plugin.common.utils.CustomThreadPool;
 import com.plugin.common.utils.CustomThreadPool.TaskWrapper;
 import com.plugin.common.utils.CustomThreadPool.ThreadPoolSnapShot;
 import com.plugin.common.utils.Destroyable;
+import com.plugin.common.utils.UtilsRuntime;
 import com.plugin.common.utils.NotifyHandlerObserver;
 import com.plugin.common.utils.SingleInstanceBase;
 import com.plugin.common.utils.StringUtils;
 import com.plugin.common.utils.UtilsConfig;
-import com.plugin.common.utils.UtilsRuntime;
-import com.plugin.common.utils.files.FileUtil;
+import com.plugin.common.utils.files.DiskManager.DiskCacheType;
+import com.plugin.common.utils.image.ImageDownloader;
 import com.plugin.internet.InternetUtils;
-import com.plugin.internet.interfaces.HttpRequestHookListener;
+import com.plugin.internet.core.HttpRequestHookListener;
 
-public class FileDownloader implements Runnable, Destroyable, HttpRequestHookListener {
+public class FileDownloader extends SingleInstanceBase implements Runnable, Destroyable, HttpRequestHookListener {
 
     private static final String TAG = FileDownloader.class.getSimpleName();
     protected static final boolean DEBUG = true & UtilsConfig.UTILS_DEBUG;
@@ -227,6 +227,8 @@ public class FileDownloader implements Runnable, Destroyable, HttpRequestHookLis
     public static final int NOTIFY_DOWNLOAD_SUCCESS = -20000;
     public static final int NOTIFY_DOWNLOAD_FAILED = -40000;
 
+    protected static final int DEFAULT_KEEPALIVE = 5 * 1000;
+
     protected final NotifyHandlerObserver mSuccessHandler = new NotifyHandlerObserver(NOTIFY_DOWNLOAD_SUCCESS);
     protected final NotifyHandlerObserver mFailedHandler = new NotifyHandlerObserver(NOTIFY_DOWNLOAD_FAILED);
     protected Object objLock = new Object();
@@ -274,6 +276,9 @@ public class FileDownloader implements Runnable, Destroyable, HttpRequestHookLis
         throw new IllegalArgumentException("Can't make dir : " + dirFullPath);
     }
 
+    protected FileDownloader() {
+        super();
+    }
 
     private void processWorks() {
         mWorkListener.onProcessWork(this);
@@ -409,12 +414,12 @@ public class FileDownloader implements Runnable, Destroyable, HttpRequestHookLis
                     bIsWaiting = true;
 
                     if (DEBUG) {
-                        UtilsConfig.LOGD("entry into [[waitforUrl]] for " + DownloaderOption.DEFAULT_KEEPALIVE + "ms");
+                        UtilsConfig.LOGD("entry into [[waitforUrl]] for " + DEFAULT_KEEPALIVE + "ms");
                     }
                     objLock.wait(mKeepAlive);
 
                     if (DEBUG) {
-                        UtilsConfig.LOGD("leave [[waitforUrl]] for " + DownloaderOption.DEFAULT_KEEPALIVE + "ms");
+                        UtilsConfig.LOGD("leave [[waitforUrl]] for " + DEFAULT_KEEPALIVE + "ms");
                     }
                 }
             }
@@ -745,29 +750,15 @@ public class FileDownloader implements Runnable, Destroyable, HttpRequestHookLis
         return null;
     }
 
-    
-    protected FileDownloader(Context context, DownloaderOption option){
-    	INPUT_STREAM_CACHE_PATH = option.getDownloadTmpPath();
-    	 mContext = context.getApplicationContext();
-         mRequestList = new ArrayList<DownloadRequest>();
-         bIsStop = option.isStop();
-         mKeepAlive = option.getKeepAlive();
-         mListenerList = new LinkedList<DownloadListenerObj>();
-         InternetUtils.setHttpReturnListener(mContext, this);
-         
-    }
-    
-    private static FileDownloader mInstance;
-    
-    public static FileDownloader getInstance(Context context, DownloaderOption option){
-    	if(mInstance == null){
-    		synchronized (FileDownloader.class) {
-				if(mInstance == null){
-					mInstance = new FileDownloader(context, option);
-				}
-			}
-    	}
-    	return mInstance;
+    @Override
+    protected void init(Context context) {
+        INPUT_STREAM_CACHE_PATH = DiskManager.tryToFetchCachePathByTypeBinding(DiskCacheType.INPUTSTREAM_BIG_FILE_CACHE);
+        mContext = context.getApplicationContext();
+        mRequestList = new ArrayList<DownloadRequest>();
+        bIsStop = false;
+        mKeepAlive = DEFAULT_KEEPALIVE;
+        mListenerList = new LinkedList<DownloadListenerObj>();
+        InternetUtils.setHttpReturnListener(mContext, this);
     }
 
 }

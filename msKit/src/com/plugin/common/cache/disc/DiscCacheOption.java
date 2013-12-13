@@ -2,6 +2,8 @@ package com.plugin.common.cache.disc;
 
 import java.io.File;
 
+import android.os.Environment;
+
 import com.plugin.common.cache.disc.naming.FileNameGenerator;
 import com.plugin.common.cache.disc.naming.HashCodeFileNameGenerator;
 
@@ -13,7 +15,17 @@ public class DiscCacheOption {
 		this.nameGenerator = nameGenerator;
 	}
 	
+    private String discRootPath = Environment.getExternalStorageState()+ "/";
     
+    public String getDiscRootPath() {
+		return discRootPath;
+	}
+    
+    public void setDiscRootPath(String rootPath) {
+		this.discRootPath = rootPath;
+	}
+	
+	
 	public static String CATEGORY_FILE = "disc_cache_category_file";
 	
 	public static String CATEGORY_IMAGE = "disc_cache_category_image";

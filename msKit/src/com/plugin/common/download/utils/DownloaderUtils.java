@@ -1,13 +1,7 @@
-package com.plugin.common.cache.disc.utils;
+package com.plugin.common.download.utils;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,152 +11,7 @@ import android.text.TextUtils;
 import com.plugin.common.cache.disc.DiscCacheOption;
 import com.plugin.common.utils.LogUtil;
 
-public class DisCacheUtil {
-
-	
-
-	/**
-	 * 将bitmap保存为文件
-	 * @param src
-	 * @param saveFullPath
-	 * @return
-	 */
-    public static boolean compressBitmapToFile(Bitmap src, File savedFile) {
-        if (savedFile != null && src != null) {
-            if (savedFile.exists()) {
-                savedFile.delete();
-            }
-
-            try {
-                FileOutputStream out = new FileOutputStream(savedFile);
-                src.compress(Bitmap.CompressFormat.PNG, DiscCacheOption.BITMAP_COMPRESS_HIGH, out);
-                out.close();
-
-                return isBitmapData(savedFile.getAbsolutePath());
-            } catch (Exception e) {
-                e.printStackTrace();
-
-            }
-        }
-
-        return false;
-    }
-    
-    /**
-     * 判断是否是bitmap文件类型
-     * @param fileFullPath
-     * @return
-     */
-    public static boolean isBitmapData(String fileFullPath) {
-        if (!TextUtils.isEmpty(fileFullPath)) {
-            try {
-                BitmapFactory.Options opt = new BitmapFactory.Options();
-
-                opt.inPurgeable = true;
-                opt.inJustDecodeBounds = true;
-
-                BitmapFactory.decodeFile(fileFullPath, opt);
-                if (opt.outWidth > 0 && opt.outHeight > 0) {
-                    return true;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-
-            }
-        }
-
-        return false;
-    }
-	
-	/**
-	 * 写byte数组到文件
-	 * 
-	 * @param targetPath
-	 * @param bytes
-	 * @return
-	 */
-	public static String saveFileByBytes(File targetFile, byte[] bytes) {
-		if (bytes == null || targetFile == null || targetFile.isDirectory()
-				|| !targetFile.isAbsolute()) {
-			return null;
-		}
-
-		FileOutputStream fos = null;
-		try {
-			fos = new FileOutputStream(targetFile);
-			fos.write(bytes);
-			fos.flush();
-			return targetFile.getAbsolutePath();
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (fos != null) {
-					fos.close();
-					fos = null;
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-
-		return null;
-	}
-
-	/**
-	 * 写输入流到文件
-	 * 
-	 * @param is
-	 * @param targetFile
-	 * @return
-	 * @throws IOException
-	 */
-	public static String saveFileByStream(InputStream is, File targetFile) {
-		if (is == null || targetFile == null || targetFile.isDirectory()
-				|| !targetFile.isAbsolute()) {
-			return null;
-		}
-
-		OutputStream os = null;
-		try {
-			targetFile.createNewFile();
-			os = new BufferedOutputStream(new FileOutputStream(targetFile),
-					DiscCacheOption.BUFFER_SIZE);
-			copyStream(is, os);
-			return targetFile.getAbsolutePath();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}finally{
-			try {
-				if(os != null){
-					os.close();
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		return null;
-	}
-
-	/**
-	 * 输入流到输出流
-	 * 
-	 * @param is
-	 * @param os
-	 * @throws IOException
-	 */
-	public static void copyStream(InputStream is, OutputStream os)
-			throws IOException {
-		byte[] bytes = new byte[DiscCacheOption.BUFFER_SIZE];
-		while (true) {
-			int count = is.read(bytes, 0, DiscCacheOption.BUFFER_SIZE);
-			if (count == -1) {
-				break;
-			}
-			os.write(bytes, 0, count);
-		}
-	}
+public class DownloaderUtils {
 	
 	  /**
      * 根据图片的全路径来获取一张图片，在获取图片的时候会对图片做就地压缩，同时会将图片 的旋转角度准换成0度。
@@ -177,6 +26,7 @@ public class DisCacheUtil {
         return loadBitmapWithSizeCheck(file, com.plugin.common.utils.ExifHelper.getRotationFromExif(file.getAbsolutePath()));
     }
 	
+
     public static Bitmap loadBitmapWithSizeCheck(File bitmapFile, int orientataion) {
         if (LogUtil.UTILS_DEBUG) {
             LogUtil.LOGD("load file from path = " + bitmapFile.getPath());
@@ -337,65 +187,28 @@ public class DisCacheUtil {
 	}
 	
     /**
-     * 将src所指向的文件copy到targetFullPath所指向的文件，只支持文件copy，不支持文件夹copy
-     * 
-     * @param src
-     * @param targetFullPath
+     * 判断是否是bitmap文件类型
+     * @param fileFullPath
      * @return
      */
-    public static String copyFile(String src, String targetFullPath) {
-        File file = new File(src);
-        if (!file.exists() || file.isDirectory()) {
-            return null;
-        }
-        FileInputStream fi = null;
-        FileOutputStream fo = null;
-        try {
-            fi = new FileInputStream(file);
-            File targetDir = new File(targetFullPath).getParentFile();
-            if (targetDir == null) {
-            	return null;
-            }
-            if (!targetDir.exists()) {
-                if (!targetDir.mkdirs())
-                    return null;
-            }
-
-            File targetFile = new File(targetFullPath);
-            if (targetFile.exists()) {
-            	targetFile.delete();
-            }
-
-            if (!targetFile.createNewFile()) {
-                return null;
-            }
-
-            fo = new FileOutputStream(targetFile);
-            int count = 102400;
-            byte[] buffer = new byte[count];
-            int read = 0;
-            while ((read = fi.read(buffer, 0, count)) != -1) {
-                fo.write(buffer, 0, read);
-            }
-
-            // TODO: set access privilege
-
-            return targetFullPath;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
+    public static boolean isBitmapData(String fileFullPath) {
+        if (!TextUtils.isEmpty(fileFullPath)) {
             try {
-                if (fi != null)
-                    fi.close();
-                if (fo != null)
-                    fo.close();
-            } catch (IOException e) {
+                BitmapFactory.Options opt = new BitmapFactory.Options();
+
+                opt.inPurgeable = true;
+                opt.inJustDecodeBounds = true;
+
+                BitmapFactory.decodeFile(fileFullPath, opt);
+                if (opt.outWidth > 0 && opt.outHeight > 0) {
+                    return true;
+                }
+            } catch (Exception e) {
                 e.printStackTrace();
+
             }
         }
 
-        return null;
+        return false;
     }
 }

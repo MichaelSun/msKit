@@ -8,6 +8,7 @@ import com.plugin.common.cache.disc.BasicDiscCache;
 import com.plugin.common.cache.disc.DiscCacheOption;
 import com.plugin.common.cache.disc.IDiscCache;
 import com.plugin.common.cache.disc.naming.FileNameGenerator;
+import com.plugin.common.cache.disc.naming.HashCodeFileNameGenerator;
 import com.plugin.common.cache.disc.utils.DisCacheUtil;
 import com.plugin.common.utils.LogUtil;
 
@@ -45,8 +46,19 @@ public class ImageDiscCache extends BasicDiscCache<Bitmap> {
 		
 		 if (LogUtil.UTILS_DEBUG) {
 			 LogUtil.LOGD("[[getBitmapFromDiskWithReuseBitmap]] file name = " + bmpFile.getName() + " <<true>>");
-	        }
+		 }
 	    return bmp;
+	}
+
+	@Override
+	public String copy(String source, String dest) {
+		String hashKey = fileNameGenerator.generate(dest);
+        String fullFileName = this.discDir.getAbsolutePath() + hashKey;
+        File file = new File(source);
+        if(file.exists()){
+        	return DisCacheUtil.copyFile(source, fullFileName);
+        }
+        return null;
 	}
 
 

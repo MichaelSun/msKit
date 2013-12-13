@@ -11,6 +11,8 @@ public interface IDiscCache<T> {
 	
 	String put(String key, byte[] bytes);
 	
+	String copy(String source, String dest);
+	
 	T get(String key);
 	
 	boolean remove(String key);

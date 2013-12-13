@@ -1,14 +1,15 @@
 package com.plugin.internet;
 
+import java.io.InputStream;
+
 import android.content.Context;
+
 import com.plugin.internet.impl.BeanRequestFactory;
 import com.plugin.internet.impl.HttpClientFactory;
 import com.plugin.internet.interfaces.HttpConnectHookListener;
 import com.plugin.internet.interfaces.HttpRequestHookListener;
 import com.plugin.internet.interfaces.NetWorkException;
 import com.plugin.internet.interfaces.RequestBase;
-
-import java.io.InputStream;
 
 public final class InternetUtils {
 

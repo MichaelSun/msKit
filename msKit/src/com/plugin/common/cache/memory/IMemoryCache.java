@@ -12,6 +12,8 @@ public interface IMemoryCache<K,V> {
 	
 	boolean put(K key, byte[] bytes);
 	
+	boolean put(K key, String sourceFilePath);
+	
 	V get(K key);
 	
 	void remove(K key);

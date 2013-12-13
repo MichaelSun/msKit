@@ -75,5 +75,10 @@ public class FileMemoryCache implements IMemoryCache<String, File>{
 		fileDiscCache.clear();
 	}
 
+	@Override
+	public boolean put(String key, String sourceFilePath) {
+		return false;
+	}
+
 
 }
