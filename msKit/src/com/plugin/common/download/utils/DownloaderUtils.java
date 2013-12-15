@@ -16,7 +16,7 @@ public class DownloaderUtils {
 	  /**
      * 根据图片的全路径来获取一张图片，在获取图片的时候会对图片做就地压缩，同时会将图片 的旋转角度准换成0度。
      * 
-     * @param fileFullPath
+     * @param
      * @return
      */
     public static Bitmap loadBitmapWithSizeOrientation(File file) {
