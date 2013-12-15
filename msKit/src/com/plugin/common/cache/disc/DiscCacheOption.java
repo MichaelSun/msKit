@@ -9,11 +9,19 @@ import com.plugin.common.cache.disc.naming.HashCodeFileNameGenerator;
 
 public class DiscCacheOption {
 
-	public DiscCacheOption(String category, String discDir, FileNameGenerator nameGenerator) {
-		this.category = category;
-		this.disCachedir = discDir;
-		this.nameGenerator = nameGenerator;
-	}
+    //TODO 路径还要修改
+    public DiscCacheOption(String category, FileNameGenerator nameGenerator) {
+        this.category = category;
+        this.disCachedir = discRootPath + category + "/";
+        this.nameGenerator = nameGenerator;
+    }
+
+
+//	public DiscCacheOption(String category, String discDir, FileNameGenerator nameGenerator) {
+//		this.category = category;
+//		this.disCachedir = discDir;
+//		this.nameGenerator = nameGenerator;
+//	}
 	
     private String discRootPath = Environment.getExternalStorageState()+ "/";
     

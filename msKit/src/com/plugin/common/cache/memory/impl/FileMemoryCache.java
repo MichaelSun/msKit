@@ -18,19 +18,7 @@ public class FileMemoryCache implements IMemoryCache<String, File>{
 	
 	private MemoryCacheOption mOption;
 	
-//	public static FileMemoryCache getInstance(MemoryCacheOption option){
-//		if(gFileMemoryCache == null){
-//			synchronized (FileMemoryCache.class) {
-//				if(gFileMemoryCache == null){
-//					return new FileMemoryCache(option);
-//				}
-//			}
-//		}
-//		
-//		return gFileMemoryCache;
-//	}
-	
-	
+
 	public FileMemoryCache(MemoryCacheOption option) {
 		DiscCacheOption discCacheOption = option.getDiscCacheOption();
 		fileDiscCache = (FileDiscCache) DiscCacheFactory.getInstance().getDiscCache(discCacheOption);
@@ -38,37 +26,32 @@ public class FileMemoryCache implements IMemoryCache<String, File>{
 	}
 	
 	@Override
-	public boolean put(String key, File value) {
+	public boolean put(String category, String key, File value) {
 		return false;
 	}
 
 	@Override
-	public boolean put(String key, InputStream in) {
+	public boolean put(String category, String key, InputStream in) {
 		fileDiscCache.put(key, in);
 		return true;
 	}
 
 	@Override
-	public boolean put(String key, byte[] bytes) {
+	public boolean put(String category, String key, byte[] bytes) {
 		fileDiscCache.put(key, bytes);
 		return false;
 	}
 
 	@Override
-	public File get(String key) {
+	public File get(String category, String key) {
 		return fileDiscCache.get(key);
 	}
 
 	@Override
-	public void remove(String key) {
+	public void remove(String category, String key) {
 		fileDiscCache.remove(key);
 	}
 
-	@Override
-	public Collection<String> keys() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public void clear() {
@@ -76,7 +59,7 @@ public class FileMemoryCache implements IMemoryCache<String, File>{
 	}
 
 	@Override
-	public boolean put(String key, String sourceFilePath) {
+	public boolean put(String category, String key, String sourceFilePath) {
 		return false;
 	}
 

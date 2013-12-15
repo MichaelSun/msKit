@@ -42,70 +42,50 @@ public class ImageMemoryCacheManager {
 	}
 
 
-	
-	public boolean put(String category, String key, Bitmap bmp) {
-		if (!TextUtils.isEmpty(key) && bmp != null) {
-			String formatKey = makeFileKeyName(category, key);
-			imageMemoryCache.put(formatKey, bmp);
-			return true;
-		}
-		
-		return false;
 
-	}
+    public boolean put(String category, String key, Bitmap bmp) {
+        if (!TextUtils.isEmpty(key) && !TextUtils.isEmpty(key) && bmp != null) {
+            imageMemoryCache.put(category, key, bmp);
+            return true;
+        }
 
-	public boolean put(String category, String key, InputStream in) {
-		if (!TextUtils.isEmpty(category) && in != null) {
-			String formatKey = makeFileKeyName(category, key);
-			imageMemoryCache.put(formatKey, in);
-			return false;
-		}
-		return false;
-	}
+        return false;
 
-	public boolean put(String category, String key, byte[] bytes) {
-		if (!TextUtils.isEmpty(category) && bytes != null) {
-			String formatKey = makeFileKeyName(category, key);
-			imageMemoryCache.put(formatKey, bytes);
-			return false;
-		}
-		
-		return false;
-	}
-	
-	public boolean put(String category, String key, String sourceFilePath){
-        if (TextUtils.isEmpty(category) || TextUtils.isEmpty(key) || TextUtils.isEmpty(sourceFilePath)) {
+    }
+
+    public boolean put(String category, String key, InputStream in) {
+        if (!TextUtils.isEmpty(category) && !TextUtils.isEmpty(key) && in != null) {
+            imageMemoryCache.put(category, key, in);
             return false;
         }
-        String formatKey = makeFileKeyName(category, key);
-    
-        return imageMemoryCache.put(formatKey, sourceFilePath);
-	}
+        return false;
+    }
 
-	public Bitmap get(String category, String key) {
-		if (!TextUtils.isEmpty(category) && !TextUtils.isEmpty(key)) {
-			String formatKey = makeFileKeyName(category, key);
-			Bitmap bmp = imageMemoryCache.get(formatKey);
-			return bmp;
-		}
-		return null;
-	}
+    public boolean put(String category, String key, byte[] bytes) {
+        if (!TextUtils.isEmpty(category) && !TextUtils.isEmpty(key) && bytes != null) {
+            imageMemoryCache.put(category, key, bytes);
+            return false;
+        }
 
-	public void remove(String category, String key) {
-		if (!TextUtils.isEmpty(category) && !TextUtils.isEmpty(key)) {
-			String formatKey = makeFileKeyName(category, key);
-			imageMemoryCache.remove(formatKey);
-		}
-	}
+        return false;
+    }
 
-	public void clear() {
-		this.imageMemoryCache.clear();
-	}
-	
-    protected String makeFileKeyName(String category, String key) {
-        StringBuilder sb = new StringBuilder(256);
-        sb.append(category).append("/").append(key);
-        return sb.toString();
+    public Bitmap get(String category, String key) {
+        if (!TextUtils.isEmpty(category) && !TextUtils.isEmpty(key)) {
+            Bitmap bmp = imageMemoryCache.get(category, key);
+            return bmp;
+        }
+        return null;
+    }
+
+    public void remove(String category, String key) {
+        if (!TextUtils.isEmpty(category) && !TextUtils.isEmpty(key)) {
+            imageMemoryCache.remove(category ,key);
+        }
+    }
+
+    public void clear() {
+        this.imageMemoryCache.clear();
     }
 
 }

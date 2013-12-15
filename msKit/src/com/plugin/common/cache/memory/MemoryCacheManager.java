@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.text.TextUtils;
 
 import com.plugin.common.cache.memory.impl.ImageMemoryCache;
+import org.w3c.dom.Text;
 
 public class MemoryCacheManager {
 
@@ -38,9 +39,8 @@ public class MemoryCacheManager {
 
 	
 	public boolean put(String category, String key, Bitmap bmp) {
-		if (!TextUtils.isEmpty(key) && bmp != null) {
-			String formatKey = makeFileKeyName(category, key);
-			imageMemoryCache.put(formatKey, bmp);
+		if (!TextUtils.isEmpty(key) && !TextUtils.isEmpty(key) && bmp != null) {
+			imageMemoryCache.put(category, key, bmp);
 			return true;
 		}
 		
@@ -49,18 +49,16 @@ public class MemoryCacheManager {
 	}
 
 	public boolean put(String category, String key, InputStream in) {
-		if (!TextUtils.isEmpty(category) && in != null) {
-			String formatKey = makeFileKeyName(category, key);
-			imageMemoryCache.put(key, in);
+		if (!TextUtils.isEmpty(category) && !TextUtils.isEmpty(key) && in != null) {
+			imageMemoryCache.put(category, key, in);
 			return false;
 		}
 		return false;
 	}
 
 	public boolean put(String category, String key, byte[] bytes) {
-		if (!TextUtils.isEmpty(category) && bytes != null) {
-			String formatKey = makeFileKeyName(category, key);
-			imageMemoryCache.put(formatKey, bytes);
+		if (!TextUtils.isEmpty(category) && !TextUtils.isEmpty(key) && bytes != null) {
+			imageMemoryCache.put(category, key, bytes);
 			return false;
 		}
 		
@@ -69,8 +67,7 @@ public class MemoryCacheManager {
 
 	public Bitmap get(String category, String key) {
 		if (!TextUtils.isEmpty(category) && !TextUtils.isEmpty(key)) {
-			String formatKey = makeFileKeyName(category, key);
-			Bitmap bmp = imageMemoryCache.get(formatKey);
+			Bitmap bmp = imageMemoryCache.get(category, key);
 			return bmp;
 		}
 		return null;
@@ -78,8 +75,7 @@ public class MemoryCacheManager {
 
 	public void remove(String category, String key) {
 		if (!TextUtils.isEmpty(category) && !TextUtils.isEmpty(key)) {
-			String formatKey = makeFileKeyName(category, key);
-			imageMemoryCache.remove(formatKey);
+			imageMemoryCache.remove(category ,key);
 		}
 	}
 
@@ -87,10 +83,5 @@ public class MemoryCacheManager {
 		this.imageMemoryCache.clear();
 	}
 	
-    protected String makeFileKeyName(String category, String key) {
-        StringBuilder sb = new StringBuilder(256);
-        sb.append(category).append("/").append(key);
-        return sb.toString();
-    }
 
 }

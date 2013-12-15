@@ -6,19 +6,17 @@ import java.util.Collections;
 
 public interface IMemoryCache<K,V> {
 
-	boolean put(K key,V value);
+	boolean put(K category, K key,V value);
 	
-	boolean put(K key, InputStream in);
+	boolean put(K category, K key, InputStream in);
 	
-	boolean put(K key, byte[] bytes);
+	boolean put(K category, K key, byte[] bytes);
 	
-	boolean put(K key, String sourceFilePath);
+	boolean put(K category, K key, String sourceFilePath);
 	
-	V get(K key);
+	V get(K category, K key);
 	
-	void remove(K key);
-	
-	Collection<K> keys();
+	void remove(K category, K key);
 	
 	void clear();
 }
