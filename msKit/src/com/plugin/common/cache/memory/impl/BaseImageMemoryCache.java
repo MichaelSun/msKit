@@ -1,18 +1,10 @@
 package com.plugin.common.cache.memory.impl;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 import com.plugin.common.cache.disc.DiscCacheFactory;
-import com.plugin.common.cache.disc.DiscCacheOption;
-import com.plugin.common.cache.disc.IDiscCache;
 import com.plugin.common.cache.disc.impl.ImageDiscCache;
-import com.plugin.common.cache.disc.naming.HashCodeFileNameGenerator;
 import com.plugin.common.cache.memory.IMemoryCache;
 import com.plugin.common.cache.memory.MemoryCacheOption;
 
@@ -25,8 +17,6 @@ public class BaseImageMemoryCache implements IMemoryCache<String, Bitmap> {
 
 
 	protected LruCache<String, Bitmap> lruCache;
-	
-	private ImageDiscCache imageDiscCache;
 	
 	private boolean autoSave2Disk;
 	
@@ -105,7 +95,8 @@ public class BaseImageMemoryCache implements IMemoryCache<String, Bitmap> {
         	return true;
         }
         String formatKey = makeFileKeyName(category, key);
-        String path = this.imageDiscCache.copy(sourceFilePath, formatKey);
+        ImageDiscCache imageCache = (ImageDiscCache) DiscCacheFactory.getInstance().getImageDiscCache(category);
+        String path = imageCache.copy(sourceFilePath, formatKey);
 		if(path != null){
 			return true;
 		}
