@@ -24,14 +24,6 @@ import android.text.TextUtils;
 public class BaseImageMemoryCache implements IMemoryCache<String, Bitmap> {
 
 
-    /**
-     * memory Cache category
-     */
-    public static final String IMAGE_CACHE_CATEGORY_USER_HEAD_ROUNDED = "user_head_rounded";
-    public static final String IMAGE_CACHE_CATEGORY_RAW = "image_cache_category_source";
-    public static final String IMAGE_CACHE_CATEGORY_THUMB = "image_cache_category_thumb";
-    public static final String IMAGE_CACHE_CATEGORY_SMALL = "image_cache_category_small";
-
 	protected LruCache<String, Bitmap> lruCache;
 	
 	private ImageDiscCache imageDiscCache;
@@ -40,8 +32,7 @@ public class BaseImageMemoryCache implements IMemoryCache<String, Bitmap> {
 	
 	private boolean autoFetchFromDisk;
 
-    private Map<String, IDiscCache>  discCaches = new HashMap<String, IDiscCache>();
-	
+
 	protected BaseImageMemoryCache(MemoryCacheOption option) {
 		this.lruCache = new LruCache<String, Bitmap>(
 				option.getMaxMemoryCacheSize()) {
@@ -50,8 +41,9 @@ public class BaseImageMemoryCache implements IMemoryCache<String, Bitmap> {
 				return bmp.getRowBytes() * bmp.getHeight();
 			}
 		};
-		
-		imageDiscCache = (ImageDiscCache) DiscCacheFactory.getInstance().getDiscCache(option.getDiscCacheOption());
+
+        //初始化四个imageDiscCache
+        DiscCacheFactory.getInstance().createDefaultDisc(option.getDefaultCategories());
 		
 		autoSave2Disk = option.isAutoSave2Disk();
 		autoFetchFromDisk = option.isAutoFetchFromDisk();
@@ -147,7 +139,7 @@ public class BaseImageMemoryCache implements IMemoryCache<String, Bitmap> {
 	@Override
 	public void clear() {
 		lruCache.evictAll();
-        clearAllDisc();
+        DiscCacheFactory.getInstance().clear();
 	}
 
     protected String makeFileKeyName(String category, String key) {
@@ -158,13 +150,8 @@ public class BaseImageMemoryCache implements IMemoryCache<String, Bitmap> {
 
     private void save2Disc(boolean autoSave2Disk, String category, String key, Bitmap value){
         if(autoSave2Disk){
-            ImageDiscCache imageCache = (ImageDiscCache) this.discCaches.get(category);
-            if(imageCache != null){
-                imageCache.put(key,value);
-                return;
-            }
+            ImageDiscCache imageCache = (ImageDiscCache) DiscCacheFactory.getInstance().getImageDiscCache(category);
 
-            createNewCategoryDisc(category);
             if(imageCache != null){
                 imageCache.put(key,value);
                 return;
@@ -174,61 +161,33 @@ public class BaseImageMemoryCache implements IMemoryCache<String, Bitmap> {
 
     private void save2Disc(boolean autoSave2Disk, String category, String key, byte[] bytes){
         if(autoSave2Disk){
-            ImageDiscCache imageCache = (ImageDiscCache) this.discCaches.get(category);
+            ImageDiscCache imageCache = (ImageDiscCache) DiscCacheFactory.getInstance().getImageDiscCache(category);
             if(imageCache != null){
                 imageCache.put(key,bytes);
                 return;
             }
 
-            createNewCategoryDisc(category);
-            if(imageCache != null){
-                imageCache.put(key,bytes);
-                return;
-            }
         }
     }
 
     private void save2Disc(boolean autoSave2Disk, String category, String key, InputStream in){
         if(autoSave2Disk){
-            ImageDiscCache imageCache = (ImageDiscCache) this.discCaches.get(category);
+            ImageDiscCache imageCache = (ImageDiscCache) DiscCacheFactory.getInstance().getImageDiscCache(category);
             if(imageCache != null){
                 imageCache.put(key,in);
                 return;
             }
 
-            createNewCategoryDisc(category);
-            if(imageCache != null){
-                imageCache.put(key,in);
-                return;
-            }
         }
     }
 
     private Bitmap fetchFromDisc(String category, String key){
-            ImageDiscCache imageCache = (ImageDiscCache) this.discCaches.get(category);
+        ImageDiscCache imageCache = (ImageDiscCache) DiscCacheFactory.getInstance().getImageDiscCache(category);
             if(imageCache != null){
                 return imageCache.get(key);
             }
             return null;
     }
 
-    private void clearAllDisc(){
-        Iterator<Map.Entry<String, IDiscCache>> iterator= this.discCaches.entrySet().iterator();
-        while(iterator.hasNext()){
-            Map.Entry<String, IDiscCache> entry = iterator.next();
-            ImageDiscCache discCache = (ImageDiscCache) entry.getValue();
-            discCache.clear();
-        }
-
-        this.discCaches.clear();
-
-    }
-
-    //TODO  路径尚未配置好
-    private void createNewCategoryDisc(String category){
-        DiscCacheOption option = new DiscCacheOption(category,new HashCodeFileNameGenerator());
-        ImageDiscCache imageDiscCache = new ImageDiscCache(option);
-        this.discCaches.put(category, imageDiscCache);
-    }
 
 }

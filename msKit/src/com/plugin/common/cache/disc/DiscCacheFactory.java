@@ -1,11 +1,10 @@
 package com.plugin.common.cache.disc;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import com.plugin.common.cache.disc.impl.FileDiscCache;
 import com.plugin.common.cache.disc.impl.ImageDiscCache;
+import com.plugin.common.cache.disc.naming.HashCodeFileNameGenerator;
 
 public class DiscCacheFactory {
 
@@ -28,28 +27,52 @@ public class DiscCacheFactory {
 	private DiscCacheFactory() {
 		
 	}
+
+    public void createDefaultDisc(List<String> categories){
+        if(categories != null){
+            for(String category: categories){
+                getImageDiscCache(category);
+            }
+        }
+    }
+
+
 	
 	
-	public IDiscCache getDiscCache(DiscCacheOption option){
-		IDiscCache discCache = discCaches.get(option.getDisCachedir());
-		if(discCache == null){
-			if(option.getCategory().equals(DiscCacheOption.CATEGORY_FILE)){
-				discCache = new FileDiscCache(option);
-			}
-			if(option.getCategory().equals(DiscCacheOption.CATEGORY_IMAGE)){
-				discCache = new ImageDiscCache(option);
-			}
-			
-			this.discCaches.put(option.getDisCachedir(), discCache);
-			
-		}
-		
-		return discCache;
-	}
+    public IDiscCache getFileDiscCache(String category){
+        IDiscCache discCache = discCaches.get(category);
+        if(discCache == null){
+            DiscCacheOption option = new DiscCacheOption(category,new HashCodeFileNameGenerator());
+            discCache = new FileDiscCache(option);
+            this.discCaches.put(category, discCache);
+
+        }
+
+        return discCache;
+    }
+
+    public IDiscCache getImageDiscCache(String category){
+        IDiscCache discCache = discCaches.get(category);
+        if(discCache == null){
+            DiscCacheOption option = new DiscCacheOption(category,new HashCodeFileNameGenerator());
+            discCache = new ImageDiscCache(option);
+            this.discCaches.put(category, discCache);
+
+        }
+
+        return discCache;
+    }
 	
 	public void clear(){
-		discCaches.clear();
-	}
+        Iterator<Map.Entry<String, IDiscCache>> iterator= this.discCaches.entrySet().iterator();
+        while(iterator.hasNext()){
+            Map.Entry<String, IDiscCache> entry = iterator.next();
+            ImageDiscCache discCache = (ImageDiscCache) entry.getValue();
+            discCache.clear();
+        }
+
+        this.discCaches.clear();
+    }
 	
 	
 }

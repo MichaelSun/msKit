@@ -39,28 +39,22 @@ public class MemoryCacheOption {
 	public static final String IMAGE_CACHE_CATEGORY_THUMB = "image_cache_category_thumb";
 	public static final String IMAGE_CACHE_CATEGORY_SMALL = "image_cache_category_small";
 
-	public static final String IMAGE_CACHE_CATEGORY_USER_HEAD_ROUNDED_DIR = "";
-	public static final String IMAGE_CACHE_CATEGORY_RAW_DIR = "";
-	public static final String IMAGE_CACHE_CATEGORY_THUMB_DIR = "";
-	public static final String IMAGE_CACHE_CATEGORY_SMALL_DIR = "";
-
-	private Map<String, DiscCacheOption> discCaches = new HashMap<String, DiscCacheOption>();
+    private List<String> defaultCategories = new ArrayList<String>();
 
 	public MemoryCacheOption() {
-		discCaches.put(IMAGE_CACHE_CATEGORY_USER_HEAD_ROUNDED,
-				new DiscCacheOption(IMAGE_CACHE_CATEGORY_USER_HEAD_ROUNDED,
-						IMAGE_CACHE_CATEGORY_USER_HEAD_ROUNDED_DIR,
-						new HashCodeFileNameGenerator()));
-		discCaches.put(IMAGE_CACHE_CATEGORY_RAW, new DiscCacheOption(
-				IMAGE_CACHE_CATEGORY_RAW, IMAGE_CACHE_CATEGORY_RAW_DIR,
-				new HashCodeFileNameGenerator()));
-		discCaches.put(IMAGE_CACHE_CATEGORY_THUMB, new DiscCacheOption(
-				IMAGE_CACHE_CATEGORY_THUMB, IMAGE_CACHE_CATEGORY_THUMB_DIR,
-				new HashCodeFileNameGenerator()));
-		discCaches.put(IMAGE_CACHE_CATEGORY_SMALL, new DiscCacheOption(
-				IMAGE_CACHE_CATEGORY_SMALL, IMAGE_CACHE_CATEGORY_SMALL_DIR,
-				new HashCodeFileNameGenerator()));
+        createDefaultCategory();
 	}
+
+    private void createDefaultCategory(){
+        this.defaultCategories.add(IMAGE_CACHE_CATEGORY_SMALL);
+        this.defaultCategories.add(IMAGE_CACHE_CATEGORY_RAW);
+        this.defaultCategories.add(IMAGE_CACHE_CATEGORY_THUMB);
+        this.defaultCategories.add(IMAGE_CACHE_CATEGORY_USER_HEAD_ROUNDED);
+    }
+
+    public List<String> getDefaultCategories(){
+        return defaultCategories;
+    }
 
 	/**
 	 * 是否自动写disc
