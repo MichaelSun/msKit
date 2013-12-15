@@ -15,11 +15,8 @@ public class ImageMemoryCacheManager {
 
 	private ImageMemoryCache imageMemoryCache;
 	
-	private MemoryCacheOption mOption;
-	
-	
+
 	private ImageMemoryCacheManager(MemoryCacheOption option) {
-		this.mOption = option;
 		imageMemoryCache = ImageMemoryCache.getInstance(option);
 	}
 	
@@ -38,7 +35,7 @@ public class ImageMemoryCacheManager {
 
 
 
-    public boolean put(String category, String key, Bitmap bmp) {
+    public boolean put(String category, String key, String bmp) {
         if (!TextUtils.isEmpty(key) && !TextUtils.isEmpty(key) && bmp != null) {
             imageMemoryCache.put(category, key, bmp);
             return true;
@@ -48,7 +45,7 @@ public class ImageMemoryCacheManager {
 
     }
 
-    public boolean put(String category, String key, InputStream in) {
+    public boolean put(String category, String key, Bitmap in) {
         if (!TextUtils.isEmpty(category) && !TextUtils.isEmpty(key) && in != null) {
             imageMemoryCache.put(category, key, in);
             return false;

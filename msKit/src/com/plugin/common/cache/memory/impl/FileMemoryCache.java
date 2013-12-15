@@ -20,9 +20,11 @@ public class FileMemoryCache implements IMemoryCache<String, File>{
 	
 
 	public FileMemoryCache(MemoryCacheOption option) {
-		DiscCacheOption discCacheOption = option.getDiscCacheOption();
-		fileDiscCache = (FileDiscCache) DiscCacheFactory.getInstance().getDiscCache(discCacheOption);
-		this.mOption = option;
+        if(option != null){
+            String category = option.getFileDefaultCategory();
+            fileDiscCache = (FileDiscCache) DiscCacheFactory.getInstance().getFileDiscCache(category);
+            this.mOption = option;
+        }
 	}
 	
 	@Override
@@ -39,7 +41,7 @@ public class FileMemoryCache implements IMemoryCache<String, File>{
 	@Override
 	public boolean put(String category, String key, byte[] bytes) {
 		fileDiscCache.put(key, bytes);
-		return false;
+		return true;
 	}
 
 	@Override
@@ -60,7 +62,8 @@ public class FileMemoryCache implements IMemoryCache<String, File>{
 
 	@Override
 	public boolean put(String category, String key, String sourceFilePath) {
-		return false;
+        fileDiscCache.copy(sourceFilePath,key);
+		return true;
 	}
 
 

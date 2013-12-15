@@ -28,11 +28,17 @@ public class DiscCacheFactory {
 		
 	}
 
-    public void createDefaultDisc(List<String> categories){
+    public void createImageDefaultDisc(List<String> categories){
         if(categories != null){
             for(String category: categories){
                 getImageDiscCache(category);
             }
+        }
+    }
+
+    public void createFileDefaultDisc(String category){
+        if(category != null){
+            getFileDiscCache(category);
         }
     }
 

@@ -33,7 +33,7 @@ public class BaseImageMemoryCache implements IMemoryCache<String, Bitmap> {
 		};
 
         //初始化四个imageDiscCache
-        DiscCacheFactory.getInstance().createDefaultDisc(option.getDefaultCategories());
+        DiscCacheFactory.getInstance().createImageDefaultDisc(option.getImageDefaultCategories());
 		
 		autoSave2Disk = option.isAutoSave2Disk();
 		autoFetchFromDisk = option.isAutoFetchFromDisk();

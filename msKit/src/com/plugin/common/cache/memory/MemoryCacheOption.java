@@ -34,6 +34,7 @@ public class MemoryCacheOption {
 	/**
 	 * memory Cache category
 	 */
+    public static final String CACHE_CATEGORY_FILE = "cache_category_file";
 	public static final String IMAGE_CACHE_CATEGORY_USER_HEAD_ROUNDED = "user_head_rounded";
 	public static final String IMAGE_CACHE_CATEGORY_RAW = "image_cache_category_source";
 	public static final String IMAGE_CACHE_CATEGORY_THUMB = "image_cache_category_thumb";
@@ -42,18 +43,23 @@ public class MemoryCacheOption {
     private List<String> defaultCategories = new ArrayList<String>();
 
 	public MemoryCacheOption() {
-        createDefaultCategory();
+        createImageDefaultCategory();
 	}
 
-    private void createDefaultCategory(){
+
+    private void createImageDefaultCategory(){
         this.defaultCategories.add(IMAGE_CACHE_CATEGORY_SMALL);
         this.defaultCategories.add(IMAGE_CACHE_CATEGORY_RAW);
         this.defaultCategories.add(IMAGE_CACHE_CATEGORY_THUMB);
         this.defaultCategories.add(IMAGE_CACHE_CATEGORY_USER_HEAD_ROUNDED);
     }
 
-    public List<String> getDefaultCategories(){
+    public List<String> getImageDefaultCategories(){
         return defaultCategories;
+    }
+
+    public String getFileDefaultCategory(){
+        return CACHE_CATEGORY_FILE;
     }
 
 	/**
@@ -82,5 +88,12 @@ public class MemoryCacheOption {
 		this.autoFetchFromDisk = autoFetchFromDisk;
 	}
 
+    public static MemoryCacheOption getDefaultMemoryCacheOpt(){
+        MemoryCacheOption opt = new MemoryCacheOption();
+        opt.setMaxMemoryCacheSize(20);
+        opt.setAutoSave2Disk(true);
+        opt.setAutoFetchFromDisk(true);
+        return opt;
+    }
 
 }
