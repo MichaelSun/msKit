@@ -82,14 +82,5 @@ public class MemoryCacheOption {
 		this.autoFetchFromDisk = autoFetchFromDisk;
 	}
 
-	private DiscCacheOption discCacheOption;
-
-	public DiscCacheOption getDiscCacheOption() {
-		return discCacheOption;
-	}
-
-	public void setDiscCacheOption(DiscCacheOption discCacheOption) {
-		this.discCacheOption = discCacheOption;
-	}
 
 }

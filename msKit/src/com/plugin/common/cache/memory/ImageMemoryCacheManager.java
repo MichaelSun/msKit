@@ -17,15 +17,10 @@ public class ImageMemoryCacheManager {
 	
 	private MemoryCacheOption mOption;
 	
-	private String cachePath;
-	
 	
 	private ImageMemoryCacheManager(MemoryCacheOption option) {
 		this.mOption = option;
 		imageMemoryCache = ImageMemoryCache.getInstance(option);
-		if(this.mOption.getDiscCacheOption()!= null){
-			cachePath = mOption.getDiscCacheOption().getDisCachedir();
-		}
 	}
 	
 

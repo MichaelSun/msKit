@@ -28,8 +28,6 @@ public class ImageMemoryCache extends BaseImageMemoryCache{
 	
 	private ImageMemoryCache(MemoryCacheOption option) {
 		super(option);
-		DiscCacheOption discCacheOption = option.getDiscCacheOption();
-		fileDiscCache = (FileDiscCache) DiscCacheFactory.getInstance().getDiscCache(discCacheOption);
 		this.mOption = option;
 	}
 	
