@@ -1,5 +1,18 @@
 package com.plugin.common.utils.files;
 
+import android.content.Context;
+import android.os.Handler;
+import android.text.TextUtils;
+import com.plugin.common.download.image.ImageDownloader;
+import com.plugin.common.utils.*;
+import com.plugin.common.utils.CustomThreadPool.TaskWrapper;
+import com.plugin.common.utils.CustomThreadPool.ThreadPoolSnapShot;
+import com.plugin.common.utils.files.DiskManager.DiskCacheType;
+import com.plugin.internet.InternetUtils;
+import com.plugin.internet.interfaces.HttpRequestHookListener;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -8,27 +21,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpRequestBase;
-
-import android.content.Context;
-import android.os.Handler;
-import android.text.TextUtils;
-
-import com.plugin.common.utils.CustomThreadPool;
-import com.plugin.common.utils.CustomThreadPool.TaskWrapper;
-import com.plugin.common.utils.CustomThreadPool.ThreadPoolSnapShot;
-import com.plugin.common.utils.Destroyable;
-import com.plugin.common.utils.UtilsRuntime;
-import com.plugin.common.utils.NotifyHandlerObserver;
-import com.plugin.common.utils.SingleInstanceBase;
-import com.plugin.common.utils.StringUtils;
-import com.plugin.common.utils.UtilsConfig;
-import com.plugin.common.utils.files.DiskManager.DiskCacheType;
-import com.plugin.common.utils.image.ImageDownloader;
-import com.plugin.internet.InternetUtils;
-import com.plugin.internet.core.HttpRequestHookListener;
 
 public class FileDownloader extends SingleInstanceBase implements Runnable, Destroyable, HttpRequestHookListener {
 
