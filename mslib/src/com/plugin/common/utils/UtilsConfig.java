@@ -63,6 +63,7 @@ public class UtilsConfig {
             DISK_DIR_PATH_BINDING = Environment.getExternalStorageDirectory() + "/." + CURRENT_PACKAGE_NAME_BINDING + "/";
             DISK_TMP_DIR_PATH_BINDING = Environment.getExternalStorageDirectory() + "/." + CURRENT_PACKAGE_NAME_BINDING + ".tmp/";
             DISK_LOG_PATH_BINDING = Environment.getExternalStorageDirectory() + "/." + CURRENT_PACKAGE_NAME_BINDING + "/";
+            DiskManager.init();
             BitmapDiskTools.init(DiskManager.tryToFetchCachePathByTypeBinding(DiskCacheType.PICTURE));
             
             SingleInstanceManager.getInstance().init(context.getApplicationContext());
