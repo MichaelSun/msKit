@@ -7,7 +7,7 @@ buildscript {
 	}
 }
 
-apply plugin: 'msKit-lib'
+apply plugin: 'android-library'
 
 android {
 	compileSdkVersion 14
