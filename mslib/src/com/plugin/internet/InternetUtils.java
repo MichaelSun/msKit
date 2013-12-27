@@ -15,6 +15,8 @@ import com.plugin.internet.core.impl.HttpClientFactory;
 
 public class InternetUtils {
 
+    public static final String ACTION_INTERNET_ERROR = "com.plugin.internet.error";
+
 	/**
 	 * 同步接口 发送REST请求
 	 * 

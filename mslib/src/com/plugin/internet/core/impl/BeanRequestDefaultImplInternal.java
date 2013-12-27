@@ -9,6 +9,9 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
+import com.plugin.internet.InternetUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -41,7 +44,7 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
     private static final String KEY_METHOD = "method";
 
     private static final String KEY_HTTP_METHOD = "httpMethod";
-    
+
     private static final String KEY_METHOD_EXT = "methodExt";
 
     private static BeanRequestDefaultImplInternal mInstance;
@@ -49,6 +52,8 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
     private HttpClientInterface mHttpClientInterface;
 
     private HttpConnectHookListener mHttpHookListener;
+
+    private Context mContext;
 
     private static Object lockObject = new Object();
 
@@ -65,6 +70,7 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
 
     private BeanRequestDefaultImplInternal(Context context) {
         mHttpClientInterface = HttpClientFactory.createHttpClientInterface(context);
+        mContext = context;
     }
 
     @Override
@@ -123,7 +129,7 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
         if (contentType == null) {
             if (!ignore && mHttpHookListener != null) {
                 mHttpHookListener.onHttpConnectError(NetWorkException.MISS_CONTENT, "Content Type MUST be specified",
-                        request);
+                                                        request);
             }
 
             throw new NetWorkException(NetWorkException.MISS_CONTENT, "Content Type MUST be specified", null);
@@ -138,7 +144,7 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
             }
 
             UtilsConfig.LOGD("\n\n//***\n| [[request::" + request + "]] \n" + "| RestAPI URL = " + api_url
-                    + "\n| after getSig bundle params is = \n" + param + " \n\\\\***\n");
+                                 + "\n| after getSig bundle params is = \n" + param + " \n\\\\***\n");
         }
 
         int size = 0;
@@ -161,11 +167,11 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
                     } catch (UnsupportedEncodingException e) {
                         if (!ignore && mHttpHookListener != null) {
                             mHttpHookListener.onHttpConnectError(NetWorkException.ENCODE_HTTP_PARAMS_ERROR,
-                                    "Unable to encode http parameters", request);
+                                                                    "Unable to encode http parameters", request);
                         }
 
                         throw new NetWorkException(NetWorkException.ENCODE_HTTP_PARAMS_ERROR,
-                                "Unable to encode http parameters", null);
+                                                      "Unable to encode http parameters", null);
                     }
                 }
             } else if (httpMethod.equals("GET")) {
@@ -190,7 +196,7 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
 
         if (DEBUG) {
             UtilsConfig.LOGD("before get internet data from server, time cost from entry = "
-                    + (System.currentTimeMillis() - entryTime) + "ms");
+                                 + (System.currentTimeMillis() - entryTime) + "ms");
         }
 
         String response = mHttpClientInterface.getResource(String.class, api_url, httpMethod, entity);
@@ -199,14 +205,14 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
         }
 
         if (DEBUG) {
-            UtilsConfig.LOGD(response);            
+            UtilsConfig.LOGD(response);
             long endTime = System.currentTimeMillis();
             StringBuilder sb = new StringBuilder(1024);
             sb.append("\n\n")
-                    .append("//***\n")
-                    .append("| ------------- begin response ------------\n")
-                    .append("|\n")
-                    .append("| [[request::" + request + "]] " + " cost time from entry : " + (endTime - entryTime)
+                .append("//***\n")
+                .append("| ------------- begin response ------------\n")
+                .append("|\n")
+                .append("| [[request::" + request + "]] " + " cost time from entry : " + (endTime - entryTime)
                             + "ms. " + "raw response String = \n");
             UtilsConfig.LOGD(sb.toString());
             sb.setLength(0);
@@ -322,13 +328,24 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
         T ret = null;
         try {
             //先检查是否是错误的数据结构
-            if (!request.getHandleErrorSelf() && mHttpHookListener != null) {
+            if (!request.getHandleErrorSelf()) {
                 JsonErrorResponse errorResponse = JsonUtils.parseError(response);
-                if (errorResponse != null
-                        && errorResponse.errorCode != 0
-                        && !TextUtils.isEmpty(errorResponse.errorMsg)) {
-                    //the response is a server error response
-                    mHttpHookListener.onHttpConnectError(errorResponse.errorCode, errorResponse.errorMsg, request);
+                if (mHttpHookListener != null) {
+                    if (errorResponse != null
+                            && errorResponse.errorCode != 0
+                            && !TextUtils.isEmpty(errorResponse.errorMsg)) {
+                        //the response is a server error response
+                        mHttpHookListener.onHttpConnectError(errorResponse.errorCode, errorResponse.errorMsg, request);
+                        return null;
+                    }
+                } else {
+                    if (errorResponse != null) {
+                        Intent i = new Intent();
+                        i.putExtra("code", errorResponse.errorCode);
+                        i.putExtra("msg", errorResponse.errorMsg);
+                        i.setAction(InternetUtils.ACTION_INTERNET_ERROR);
+                        LocalBroadcastManager.getInstance(mContext).sendBroadcast(i);
+                    }
                     return null;
                 }
             }
@@ -337,14 +354,23 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
             ret = JsonUtils.parse(response, request.getGenericType());
             if (DEBUG) {
                 UtilsConfig.LOGD("Before return, after success get the data from server, parse cost time from entry = "
-                        + (System.currentTimeMillis() - entryTime) + "ms" + " response parse result = " + ret);
+                                     + (System.currentTimeMillis() - entryTime) + "ms" + " response parse result = " + ret);
             }
-            
+
             if (ret == null) {
                 try {
+                    JsonErrorResponse response2 = JsonUtils.parseError(response);
                     if (mHttpHookListener != null) {
-                        JsonErrorResponse response2 = JsonUtils.parseError(response);
                         mHttpHookListener.onHttpConnectError(response2.errorCode, response2.errorMsg, request);
+                        ret = null;
+                    } else {
+                        if (response2 != null) {
+                            Intent i = new Intent();
+                            i.putExtra("code", response2.errorCode);
+                            i.putExtra("msg", response2.errorMsg);
+                            i.setAction(InternetUtils.ACTION_INTERNET_ERROR);
+                            LocalBroadcastManager.getInstance(mContext).sendBroadcast(i);
+                        }
                         ret = null;
                     }
                 } catch (Exception ex) {
@@ -354,27 +380,26 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
         } catch (Exception e) {
             e.printStackTrace();
             try {
+                JsonErrorResponse response2 = JsonUtils.parseError(response);
                 if (mHttpHookListener != null) {
-                    JsonErrorResponse response2 = JsonUtils.parseError(response);
                     mHttpHookListener.onHttpConnectError(response2.errorCode, response2.errorMsg, request);
+                    ret = null;
+                } else {
+                    if (response2 != null) {
+                        Intent i = new Intent();
+                        i.putExtra("code", response2.errorCode);
+                        i.putExtra("msg", response2.errorMsg);
+                        i.setAction(InternetUtils.ACTION_INTERNET_ERROR);
+                        LocalBroadcastManager.getInstance(mContext).sendBroadcast(i);
+                    }
                     ret = null;
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
-        
+
         return ret;
-        // }
-        // } else {
-        // if (!ignore && mHttpHookListener != null) {
-        // mHttpHookListener.onHttpConnectError(failureResponse.errorCode,
-        // failureResponse.errorMsg, request);
-        // }
-        //
-        // throw new NetWorkException(failureResponse.errorCode,
-        // failureResponse.errorMsg, response);
-        // }
     }
 
     @Override
