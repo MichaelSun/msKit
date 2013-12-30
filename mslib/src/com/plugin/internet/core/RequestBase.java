@@ -175,6 +175,11 @@ public abstract class RequestBase<T> {
                                     if (value != defaultValue) {
                                         params.putString(name, String.valueOf(value));
                                     }
+                                } else if (object instanceof Integer) {
+                                    int value = (Integer) object;
+                                    if (value != defaultValue) {
+                                        params.putString(name, String.valueOf(value));
+                                    }
                                 }
                             } else {
                                 String value = String.valueOf(object);
@@ -209,7 +214,6 @@ public abstract class RequestBase<T> {
     /**
      * 获取T的类型
      * 
-     * @param index
      * @return
      */
     @SuppressWarnings("unchecked")
