@@ -345,8 +345,8 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
                         i.putExtra("msg", errorResponse.errorMsg);
                         i.setAction(InternetUtils.ACTION_INTERNET_ERROR);
                         LocalBroadcastManager.getInstance(mContext).sendBroadcast(i);
+                        return null;
                     }
-                    return null;
                 }
             }
 
