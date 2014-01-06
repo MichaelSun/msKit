@@ -88,6 +88,8 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
         if (request == null) {
             if (mHttpHookListener != null) {
                 mHttpHookListener.onHttpConnectError(NetWorkException.REQUEST_NULL, "Request can't be NUll", request);
+            } else {
+                sendLocalNetworkError(NetWorkException.REQUEST_NULL, "Request can't be NUll", null);
             }
 
             throw new NetWorkException(NetWorkException.REQUEST_NULL, "Request can't be NUll", null);
@@ -95,8 +97,12 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
 
         boolean ignore = request.canIgnoreResult();
         if (!mHttpClientInterface.isNetworkAvailable()) {
-            if (!ignore && mHttpHookListener != null) {
-                mHttpHookListener.onHttpConnectError(NetWorkException.NETWORK_NOT_AVILABLE, "网络连接错误，请检查您的网络", request);
+            if (!ignore) {
+                if (mHttpHookListener != null) {
+                    mHttpHookListener.onHttpConnectError(NetWorkException.NETWORK_NOT_AVILABLE, "网络连接错误，请检查您的网络", request);
+                } else {
+                    sendLocalNetworkError(NetWorkException.NETWORK_NOT_AVILABLE, "网络连接错误，请检查您的网络", null);
+                }
             }
 
             throw new NetWorkException(NetWorkException.NETWORK_NOT_AVILABLE, "网络连接错误，请检查您的网络", null);
@@ -106,8 +112,12 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
         Bundle baseParams = requestEntity.getBasicParams();
 
         if (baseParams == null) {
-            if (!ignore && mHttpHookListener != null) {
-                mHttpHookListener.onHttpConnectError(NetWorkException.PARAM_EMPTY, "网络请求参数列表不能为空", request);
+            if (!ignore) {
+                if (mHttpHookListener != null) {
+                    mHttpHookListener.onHttpConnectError(NetWorkException.PARAM_EMPTY, "网络请求参数列表不能为空", request);
+                } else {
+                    sendLocalNetworkError(NetWorkException.PARAM_EMPTY, "网络请求参数列表不能为空", null);
+                }
             }
 
             throw new NetWorkException(NetWorkException.PARAM_EMPTY, "网络请求参数列表不能为空", null);
@@ -128,9 +138,13 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
 
         String contentType = requestEntity.getContentType();
         if (contentType == null) {
-            if (!ignore && mHttpHookListener != null) {
-                mHttpHookListener.onHttpConnectError(NetWorkException.MISS_CONTENT, "Content Type MUST be specified",
-                                                        request);
+            if (!ignore) {
+                if (mHttpHookListener != null) {
+                    mHttpHookListener.onHttpConnectError(NetWorkException.MISS_CONTENT, "Content Type MUST be specified",
+                            request);
+                } else {
+                    sendLocalNetworkError(NetWorkException.MISS_CONTENT, "Content Type MUST be specified", api_url);
+                }
             }
 
             throw new NetWorkException(NetWorkException.MISS_CONTENT, "Content Type MUST be specified", null);
@@ -166,9 +180,13 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
                     try {
                         entity = new UrlEncodedFormEntity(paramList, HTTP.UTF_8);
                     } catch (UnsupportedEncodingException e) {
-                        if (!ignore && mHttpHookListener != null) {
-                            mHttpHookListener.onHttpConnectError(NetWorkException.ENCODE_HTTP_PARAMS_ERROR,
-                                                                    "Unable to encode http parameters", request);
+                        if (!ignore) {
+                            if (mHttpHookListener != null) {
+                                mHttpHookListener.onHttpConnectError(NetWorkException.ENCODE_HTTP_PARAMS_ERROR,
+                                        "Unable to encode http parameters", request);
+                            } else {
+                                sendLocalNetworkError(NetWorkException.ENCODE_HTTP_PARAMS_ERROR, "Unable to encode http parameters", api_url);
+                            }
                         }
 
                         throw new NetWorkException(NetWorkException.ENCODE_HTTP_PARAMS_ERROR,
@@ -262,8 +280,12 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
         }
 
         if (response == null) {
-            if (!ignore && mHttpHookListener != null) {
-                mHttpHookListener.onHttpConnectError(NetWorkException.SERVER_ERROR, "服务器错误，请稍后重试", request);
+            if (!ignore) {
+                if (mHttpHookListener != null) {
+                    mHttpHookListener.onHttpConnectError(NetWorkException.SERVER_ERROR, "服务器错误，请稍后重试", request);
+                }
+            } else {
+                sendLocalNetworkError(NetWorkException.SERVER_ERROR, "服务器错误，请稍后重试", api_url);
             }
 
             throw new NetWorkException(NetWorkException.SERVER_ERROR, "服务器错误，请稍后重试", null);
@@ -397,6 +419,15 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
         i.putExtra("msg", response.errorMsg);
         i.putExtra("apiName", apiName);
         i.setAction(InternetUtils.ACTION_INTERNET_ERROR);
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(i);
+    }
+
+    private void sendLocalNetworkError(int code, String message, String apiName) {
+        Intent i = new Intent();
+        i.putExtra("code", code);
+        i.putExtra("msg", message);
+        i.putExtra("apiName", apiName);
+        i.setAction(InternetUtils.ACTION_INTERNET_ERROR_LOCAL);
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(i);
     }
 

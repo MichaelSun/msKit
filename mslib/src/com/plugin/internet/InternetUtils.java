@@ -17,6 +17,8 @@ public class InternetUtils {
 
     public static final String ACTION_INTERNET_ERROR = "com.plugin.internet.error";
 
+    public static final String ACTION_INTERNET_ERROR_LOCAL = "com.plugin.internet.error.local";
+
 	/**
 	 * 同步接口 发送REST请求
 	 * 
