@@ -283,9 +283,9 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
             if (!ignore) {
                 if (mHttpHookListener != null) {
                     mHttpHookListener.onHttpConnectError(NetWorkException.SERVER_ERROR, "服务器错误，请稍后重试", request);
+                } else {
+                    sendLocalNetworkError(NetWorkException.SERVER_ERROR, "服务器错误，请稍后重试", api_url);
                 }
-            } else {
-                sendLocalNetworkError(NetWorkException.SERVER_ERROR, "服务器错误，请稍后重试", api_url);
             }
 
             throw new NetWorkException(NetWorkException.SERVER_ERROR, "服务器错误，请稍后重试", null);
