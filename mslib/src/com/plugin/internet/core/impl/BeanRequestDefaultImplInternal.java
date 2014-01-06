@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import android.app.DownloadManager;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import com.plugin.internet.InternetUtils;
@@ -340,11 +341,7 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
                     }
                 } else {
                     if (errorResponse != null) {
-                        Intent i = new Intent();
-                        i.putExtra("code", errorResponse.errorCode);
-                        i.putExtra("msg", errorResponse.errorMsg);
-                        i.setAction(InternetUtils.ACTION_INTERNET_ERROR);
-                        LocalBroadcastManager.getInstance(mContext).sendBroadcast(i);
+                        sendAPIErrorLocal(errorResponse, api_url);
                         return null;
                     }
                 }
@@ -365,11 +362,7 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
                         ret = null;
                     } else {
                         if (response2 != null) {
-                            Intent i = new Intent();
-                            i.putExtra("code", response2.errorCode);
-                            i.putExtra("msg", response2.errorMsg);
-                            i.setAction(InternetUtils.ACTION_INTERNET_ERROR);
-                            LocalBroadcastManager.getInstance(mContext).sendBroadcast(i);
+                            sendAPIErrorLocal(response2, api_url);
                         }
                         ret = null;
                     }
@@ -386,11 +379,7 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
                     ret = null;
                 } else {
                     if (response2 != null) {
-                        Intent i = new Intent();
-                        i.putExtra("code", response2.errorCode);
-                        i.putExtra("msg", response2.errorMsg);
-                        i.setAction(InternetUtils.ACTION_INTERNET_ERROR);
-                        LocalBroadcastManager.getInstance(mContext).sendBroadcast(i);
+                        sendAPIErrorLocal(response2, api_url);
                     }
                     ret = null;
                 }
@@ -400,6 +389,15 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
         }
 
         return ret;
+    }
+
+    private void sendAPIErrorLocal(JsonErrorResponse response, String apiName) {
+        Intent i = new Intent();
+        i.putExtra("code", response.errorCode);
+        i.putExtra("msg", response.errorMsg);
+        i.putExtra("apiName", apiName);
+        i.setAction(InternetUtils.ACTION_INTERNET_ERROR);
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(i);
     }
 
     @Override
