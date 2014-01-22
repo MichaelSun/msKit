@@ -353,22 +353,21 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
             //先检查是否是错误的数据结构
             if (!request.getHandleErrorSelf()) {
                 JsonErrorResponse errorResponse = JsonUtils.parseError(response);
-                if (mHttpHookListener != null) {
-                    if (errorResponse != null
-                            && errorResponse.errorCode != 0
-                            && !TextUtils.isEmpty(errorResponse.errorMsg)) {
-                        //the response is a server error response
-                        mHttpHookListener.onHttpConnectError(errorResponse.errorCode, errorResponse.errorMsg, request);
-                        return null;
+                if (errorResponse != null) {
+                    if (!ignore) {
+                        if (mHttpHookListener != null) {
+                            if (errorResponse.errorCode != 0
+                                    && !TextUtils.isEmpty(errorResponse.errorMsg)) {
+                                //the response is a server error response
+                                mHttpHookListener.onHttpConnectError(errorResponse.errorCode, errorResponse.errorMsg, request);
+                            }
+                        } else {
+                            sendAPIErrorLocal(errorResponse, api_url);
+                        }
                     }
-                } else {
-                    if (errorResponse != null) {
-                        sendAPIErrorLocal(errorResponse, api_url);
-                        return null;
-                    }
+                    return null;
                 }
             }
-
 
             ret = JsonUtils.parse(response, request.getGenericType());
             if (DEBUG) {
@@ -379,14 +378,14 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
             if (ret == null) {
                 try {
                     JsonErrorResponse response2 = JsonUtils.parseError(response);
-                    if (mHttpHookListener != null) {
-                        mHttpHookListener.onHttpConnectError(response2.errorCode, response2.errorMsg, request);
-                        ret = null;
-                    } else {
-                        if (response2 != null) {
-                            sendAPIErrorLocal(response2, api_url);
+                    if (response2 != null) {
+                        if (!ignore) {
+                            if (mHttpHookListener != null) {
+                                mHttpHookListener.onHttpConnectError(response2.errorCode, response2.errorMsg, request);
+                            } else {
+                                sendAPIErrorLocal(response2, api_url);
+                            }
                         }
-                        ret = null;
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -396,15 +395,16 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
             e.printStackTrace();
             try {
                 JsonErrorResponse response2 = JsonUtils.parseError(response);
-                if (mHttpHookListener != null) {
-                    mHttpHookListener.onHttpConnectError(response2.errorCode, response2.errorMsg, request);
-                    ret = null;
-                } else {
-                    if (response2 != null) {
-                        sendAPIErrorLocal(response2, api_url);
+                if (response2 != null) {
+                    if (!ignore) {
+                        if (mHttpHookListener != null) {
+                            mHttpHookListener.onHttpConnectError(response2.errorCode, response2.errorMsg, request);
+                        } else {
+                            sendAPIErrorLocal(response2, api_url);
+                        }
                     }
-                    ret = null;
                 }
+                ret = null;
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
