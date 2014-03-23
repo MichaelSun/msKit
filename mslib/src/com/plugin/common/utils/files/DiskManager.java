@@ -38,7 +38,8 @@ public class DiskManager {
         MQTT_TRACE,
         AUDIO_EFFECTS,
         TMP,
-        BASE
+        BASE,
+        DOWNLOADED_APK
 	}
 
 	public static void init() {
@@ -83,6 +84,9 @@ public class DiskManager {
 			break;
 		case AUDIO_EFFECTS:
 			retDir = retDir + "effects/";
+			break;
+		case DOWNLOADED_APK:
+			retDir = retDir + "downloaded_files/";
 			break;
         case TMP:
             retDir = DISK_TMP_DIR + "camera/";
