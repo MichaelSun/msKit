@@ -1,5 +1,18 @@
 package com.plugin.common.utils.files;
 
+import android.content.Context;
+import android.os.Handler;
+import android.text.TextUtils;
+import com.plugin.common.utils.*;
+import com.plugin.common.utils.CustomThreadPool.TaskWrapper;
+import com.plugin.common.utils.CustomThreadPool.ThreadPoolSnapShot;
+import com.plugin.common.utils.files.DiskManager.DiskCacheType;
+import com.plugin.common.utils.image.ImageDownloader;
+import com.plugin.internet.InternetUtils;
+import com.plugin.internet.core.HttpRequestHookListener;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -8,27 +21,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpRequestBase;
-
-import android.content.Context;
-import android.os.Handler;
-import android.text.TextUtils;
-
-import com.plugin.common.utils.CustomThreadPool;
-import com.plugin.common.utils.CustomThreadPool.TaskWrapper;
-import com.plugin.common.utils.CustomThreadPool.ThreadPoolSnapShot;
-import com.plugin.common.utils.Destroyable;
-import com.plugin.common.utils.NotifyHandlerObserver;
-import com.plugin.common.utils.SingleInstanceBase;
-import com.plugin.common.utils.StringUtils;
-import com.plugin.common.utils.UtilsConfig;
-import com.plugin.common.utils.UtilsRuntime;
-import com.plugin.common.utils.files.DiskManager.DiskCacheType;
-import com.plugin.common.utils.image.ImageDownloader;
-import com.plugin.internet.InternetUtils;
-import com.plugin.internet.core.HttpRequestHookListener;
 
 public class FileDownloader extends SingleInstanceBase implements Runnable,
 		Destroyable, HttpRequestHookListener {
@@ -42,20 +34,20 @@ public class FileDownloader extends SingleInstanceBase implements Runnable,
 
 	protected String INPUT_STREAM_CACHE_PATH = null;
 	protected String DOWNLOADED_FILE_DIR = null;
-	
+
 	//默认为后进先下载
 	protected boolean mLastInFirstDownload = true;
 
 	/**
 	 * 当下载一个文件的时候，通过一个URL生成下载文件的本地的文件名字
-	 * 
+	 *
 	 * @author michael
-	 * 
+	 *
 	 */
 	public static interface DownloadFilenameCreateListener {
 		/**
 		 * 为一个下载URL生成本地的文件路径，注意：要保证生成文件名字的唯一性 生成的文件会下载到 big_file_cache 文件夹下面
-		 * 
+		 *
 		 * @param downloadUrl
 		 * @return
 		 */
@@ -280,7 +272,7 @@ public class FileDownloader extends SingleInstanceBase implements Runnable,
 	public static FileDownloader getInstance(Context context) {
 		return SingleInstanceBase.getInstance(FileDownloader.class);
 	}
-	
+
 	/**
 	 * 设置后进先下载开关(默认为后提交先下载)
 	 */
@@ -290,7 +282,7 @@ public class FileDownloader extends SingleInstanceBase implements Runnable,
 
 	/**
 	 * 设置下载文件的存储路径
-	 * 
+	 *
 	 * @param dirFullPath
 	 */
 	public void setDownloadDir(String dirFullPath) {
@@ -410,20 +402,21 @@ public class FileDownloader extends SingleInstanceBase implements Runnable,
 
 		// 检查是否已经下载过此request对应的文件
 		String cachedFile = checkFromCache(request);
-		File file = new File(cachedFile);
-		if (!TextUtils.isEmpty(cachedFile) && file.exists()) {
-			DownloadResponse response = tryToHandleDownloadFile(cachedFile,
-					request);
-			if (response != null) {
-				mSuccessHandler.notifyAll(-1, -1, response);
-				handleProcess(request.mDownloadUrl, (int) file.length(),
-						(int) file.length());
-				if (l != null) {
-					handleResponseByListener(DOWNLOAD_SUCCESS,
-							request.mDownloadUrl, response, false);
-				}
-			}
-			return true;
+		if (!TextUtils.isEmpty(cachedFile)) {
+            File file = new File(cachedFile);
+            if (file.exists()) {
+                DownloadResponse response = tryToHandleDownloadFile(cachedFile, request);
+                if (response != null) {
+                    mSuccessHandler.notifyAll(-1, -1, response);
+                    handleProcess(request.mDownloadUrl, (int) file.length(),
+                                     (int) file.length());
+                    if (l != null) {
+                        handleResponseByListener(DOWNLOAD_SUCCESS,
+                                                    request.mDownloadUrl, response, false);
+                    }
+                }
+                return true;
+            }
 		}
 
 		return postRequest(request);
@@ -447,16 +440,17 @@ public class FileDownloader extends SingleInstanceBase implements Runnable,
 
 		// 检查是否已经下载过此request对应的文件
 		String cachedFile = checkFromCache(request);
-		File file = new File(cachedFile);
-		if (!TextUtils.isEmpty(cachedFile) && file.exists()) {
-			DownloadResponse response = tryToHandleDownloadFile(cachedFile,
-					request);
-			if (response != null) {
-				mSuccessHandler.notifyAll(-1, -1, response);
-				handleProcess(request.mDownloadUrl, (int) file.length(),
-						(int) file.length());
-			}
-			return true;
+		if (!TextUtils.isEmpty(cachedFile)) {
+            File file = new File(cachedFile);
+            if (file.exists()) {
+                DownloadResponse response = tryToHandleDownloadFile(cachedFile, request);
+                if (response != null) {
+                    mSuccessHandler.notifyAll(-1, -1, response);
+                    handleProcess(request.mDownloadUrl, (int) file.length(),
+                                     (int) file.length());
+                }
+                return true;
+            }
 		}
 
 		synchronized (mRequestList) {
@@ -951,7 +945,7 @@ public class FileDownloader extends SingleInstanceBase implements Runnable,
 
 	/**
 	 * 将下载好的文件从缓存目录移动到下载完成的目录
-	 * 
+	 *
 	 * @param cachedFile
 	 * @param extension
 	 * @return
