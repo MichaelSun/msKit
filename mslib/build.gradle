@@ -18,6 +18,10 @@ android {
         compile fileTree(dir: 'libs', include: '*.jar', exclude: 'android-support-v4.jar')
     }
 
+    lintOptions {
+        abortOnError false
+    }
+
     sourceSets {
         main {
             manifest {
