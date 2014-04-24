@@ -101,7 +101,7 @@ public final class CustomThreadPool extends SingleInstanceBase implements Destro
         public boolean equals(Object o) {
             if (this == o)
                 return true;
-            if (o == null || getClass() != o.getClass())
+            if (o == null || getClass()!= o.getClass())
                 return false;
             TaskWrapper that = (TaskWrapper) o;
             if (runnable != null ? !runnable.equals(that.runnable) : that.runnable != null)
