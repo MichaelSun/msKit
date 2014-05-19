@@ -1,9 +1,9 @@
 package com.plugin.internet.core;
 
+import android.os.Bundle;
+
 import java.io.File;
 import java.util.ArrayList;
-
-import android.os.Bundle;
 
 public class RequestEntity {
 	
@@ -102,7 +102,7 @@ public class RequestEntity {
 	
 	public void addFileItem(MultipartFileItem fileItem) {
 		if (this.fileItems == null) {
-			this.fileItems = new ArrayList<RequestEntity.MultipartFileItem>();
+			this.fileItems = new ArrayList<MultipartFileItem>();
 		}
 		this.fileItems.add(fileItem);
 	}

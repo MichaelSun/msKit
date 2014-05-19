@@ -1,40 +1,21 @@
 package com.plugin.internet.core.impl;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.Vector;
-
-import android.app.DownloadManager;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
+import com.plugin.common.utils.UtilsConfig;
 import com.plugin.internet.InternetUtils;
+import com.plugin.internet.core.*;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 
-import android.content.Context;
-import android.os.Bundle;
-import android.text.TextUtils;
-import android.util.Log;
-
-import com.plugin.common.utils.UtilsConfig;
-import com.plugin.internet.core.BeanRequestInterface;
-import com.plugin.internet.core.HttpClientInterface;
-import com.plugin.internet.core.HttpConnectHookListener;
-import com.plugin.internet.core.InternetConfig;
-import com.plugin.internet.core.InternetStringUtils;
-import com.plugin.internet.core.JsonUtils;
-import com.plugin.internet.core.MultipartHttpEntity;
-import com.plugin.internet.core.NetWorkException;
-import com.plugin.internet.core.RequestBase;
-import com.plugin.internet.core.RequestEntity;
+import java.io.UnsupportedEncodingException;
+import java.util.*;
 
 class BeanRequestDefaultImplInternal implements BeanRequestInterface {
 
@@ -388,7 +369,7 @@ class BeanRequestDefaultImplInternal implements BeanRequestInterface {
                         }
                     }
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+//                    ex.printStackTrace();
                 }
             }
         } catch (Exception e) {

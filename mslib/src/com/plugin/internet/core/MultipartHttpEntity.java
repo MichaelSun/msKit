@@ -5,22 +5,15 @@
 
 package com.plugin.internet.core;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Set;
-
+import android.os.Bundle;
+import com.plugin.common.utils.UtilsConfig;
+import com.plugin.internet.core.RequestEntity.MultipartFileItem;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.protocol.HTTP;
 
-import android.os.Bundle;
-
-import com.plugin.common.utils.UtilsConfig;
-import com.plugin.internet.core.RequestEntity.MultipartFileItem;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Set;
 
 public class MultipartHttpEntity extends AbstractHttpEntity {
 

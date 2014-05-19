@@ -3,10 +3,9 @@
  */
 package com.plugin.common.utils.files;
 
-import java.io.File;
-import java.io.FilenameFilter;
-
 import android.os.Environment;
+
+import java.io.*;
 
 /**
  * @author Guoqing Sun Oct 24, 201211:21:42 AM
@@ -178,10 +177,10 @@ public class FileUtil {
 	}
 
 	public static SDCardInfo getSDCardInfo() {
-		String sDcString = android.os.Environment.getExternalStorageState();
+		String sDcString = Environment.getExternalStorageState();
 
-		if (sDcString.equals(android.os.Environment.MEDIA_MOUNTED)) {
-			File pathFile = android.os.Environment.getExternalStorageDirectory();
+		if (sDcString.equals(Environment.MEDIA_MOUNTED)) {
+			File pathFile = Environment.getExternalStorageDirectory();
 
 			try {
 				android.os.StatFs statfs = new android.os.StatFs(pathFile.getPath());
@@ -212,5 +211,64 @@ public class FileUtil {
 		}
 
 		return null;
+	}
+
+	public static boolean copy(InputStream from, OutputStream to) {
+		DataInputStream dis = null;
+		DataOutputStream dos = null;
+		try {
+			dis = new DataInputStream(from);
+			dos = new DataOutputStream(to);
+			int length = 0;
+			byte[] buffer = new byte[1024];
+			while ((length = dis.read(buffer, 0, buffer.length)) > 0) {
+				dos.write(buffer, 0, length);
+			}
+			return true;
+		} catch (IOException e) {
+			return false;
+		} finally {
+			closeQuietly(dis);
+			closeQuietly(dos);
+		}
+	}
+
+	public static boolean copy(File from, File to) {
+		if (from == null || to == null) {
+			return false;
+		}
+
+		if (to.exists()) {
+			if (!to.delete()) {
+				return false;
+			}
+		}
+
+		if (from.exists() && from.isFile()) {
+			InputStream is = null;
+			OutputStream os = null;
+			try {
+				is = new FileInputStream(from);
+				os = new FileOutputStream(to);
+			} catch (FileNotFoundException e) {
+				return false;
+			} finally {
+				closeQuietly(is);
+				closeQuietly(os);
+			}
+			return copy(is, os);
+		}
+
+		return false;
+	}
+
+	public static void closeQuietly(Closeable closeable) {
+		try {
+			if (closeable != null) {
+				closeable.close();
+			}
+		} catch (IOException e) {
+
+		}
 	}
 }

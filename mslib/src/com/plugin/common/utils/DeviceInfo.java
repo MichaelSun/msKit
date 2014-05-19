@@ -3,11 +3,11 @@
  */
 package com.plugin.common.utils;
 
-import java.io.File;
-
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Build;
+
+import java.io.File;
 
 /**
  * @author Guoqing Sun Mar 26, 20135:49:24 PM

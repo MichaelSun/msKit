@@ -84,23 +84,23 @@ public class BeanDescription {
 	 */
 	public void addConstructorParamDescription (ConstructorParamDescription constructorParamDescription) {
 		if (constructorParamDescriptions == null) {
-			constructorParamDescriptions = new ArrayList<BeanDescription.ConstructorParamDescription>();
+			constructorParamDescriptions = new ArrayList<ConstructorParamDescription>();
 		}
 		if (constructorParamDescription != null) {
 			constructorParamDescriptions.add(constructorParamDescription);
 		}
 	}
-	
+
 	/**
 	 * Add a constructor parameter array
 	 * @param cpdArray
 	 * 			constructor parameter array to add
 	 */
 	public void addConstructorParamDescription (ConstructorParamDescription[] cpdArray) {
-		
+
 		if (cpdArray != null) {
 			if (constructorParamDescriptions == null) {
-				constructorParamDescriptions = new ArrayList<BeanDescription.ConstructorParamDescription>();
+				constructorParamDescriptions = new ArrayList<ConstructorParamDescription>();
 			}
 			constructorParamDescriptions.addAll(Arrays.asList(cpdArray));
 		}

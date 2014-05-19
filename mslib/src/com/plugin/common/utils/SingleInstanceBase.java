@@ -3,13 +3,13 @@
  */
 package com.plugin.common.utils;
 
+import android.content.Context;
+import android.util.Log;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import android.content.Context;
-import android.util.Log;
 
 /**
  * @author Guoqing Sun Nov 5, 20129:09:50 PM

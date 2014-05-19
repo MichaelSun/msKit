@@ -6,7 +6,6 @@
 package com.plugin.internet.core;
 
 import android.text.TextUtils;
-
 import com.plugin.internet.core.impl.JsonErrorResponse;
 import com.plugin.internet.core.json.JsonMapper;
 
@@ -83,7 +82,7 @@ public class JsonUtils {
 			}
 			return failureResponse;
 		} catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 		}
 		return null;
 	}

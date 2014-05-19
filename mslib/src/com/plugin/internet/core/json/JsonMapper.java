@@ -4,25 +4,17 @@
  */
 package com.plugin.internet.core.json;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-
+import android.text.TextUtils;
+import com.plugin.internet.core.json.BeanDescription.ConstructorParamDescription;
+import com.plugin.internet.core.json.BeanDescription.FieldDescription;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.text.TextUtils;
-
-import com.plugin.internet.core.json.BeanDescription.ConstructorParamDescription;
-import com.plugin.internet.core.json.BeanDescription.FieldDescription;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * convert Json String to Java Bean
@@ -39,7 +31,7 @@ public class JsonMapper {
 	 * 			Dest value type
 	 * @return
 	 * 			Object instaceof Dest value type.
-	 * @throws JSONException
+	 * @throws org.json.JSONException
 	 */
     @SuppressWarnings("unchecked")
 	public <T> T readValue(String content, Class<T> valueType) throws JSONException {

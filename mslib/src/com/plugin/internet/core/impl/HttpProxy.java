@@ -5,11 +5,10 @@
 
 package com.plugin.internet.core.impl;
 
-import org.apache.http.HttpHost;
-
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import org.apache.http.HttpHost;
 
 final class HttpProxy {
 

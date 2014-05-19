@@ -1,20 +1,13 @@
 package com.plugin.common.utils;
 
-import java.util.HashMap;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import android.content.Context;
-import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
+import android.os.*;
 import android.os.Process;
 import android.text.TextUtils;
+
+import java.util.HashMap;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * //usage for RRThreadPool RRThreadPool.getInstance().excute(new
@@ -101,7 +94,7 @@ public final class CustomThreadPool extends SingleInstanceBase implements Destro
         public boolean equals(Object o) {
             if (this == o)
                 return true;
-            if (o == null || getClass()!= o.getClass())
+            if (o == null || getClass() != o.getClass())
                 return false;
             TaskWrapper that = (TaskWrapper) o;
             if (runnable != null ? !runnable.equals(that.runnable) : that.runnable != null)
@@ -223,7 +216,7 @@ public final class CustomThreadPool extends SingleInstanceBase implements Destro
             mExecutorService = new ThreadPoolExecutor(CORE_THREAD_COUNT, MAX_THREAD_COUNT, KEEP_ALIVE_DELAY,
                     TimeUnit.MILLISECONDS, new SynchronousQueue<Runnable>(true), new PriorityThreadFactory(
 //                            TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), new PriorityThreadFactory(
-                            "custom-tpool", android.os.Process.THREAD_PRIORITY_BACKGROUND),
+                            "custom-tpool", Process.THREAD_PRIORITY_BACKGROUND),
                     new ThreadPoolExecutor.DiscardPolicy() {
                         @Override
                         public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
@@ -240,7 +233,7 @@ public final class CustomThreadPool extends SingleInstanceBase implements Destro
     private ThreadPoolExecutor createSpecialThreadPoolExecutor(String specialName) {
         return new ThreadPoolExecutor(SPECIAL_CORE_THREAD_COUNT, SPECIAL_CORE_THREAD_COUNT, KEEP_ALIVE_DELAY,
                 TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), new PriorityThreadFactory(specialName,
-                        android.os.Process.THREAD_PRIORITY_BACKGROUND), new ThreadPoolExecutor.DiscardPolicy() {
+                        Process.THREAD_PRIORITY_BACKGROUND), new ThreadPoolExecutor.DiscardPolicy() {
                     @Override
                     public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
                         super.rejectedExecution(r, e);

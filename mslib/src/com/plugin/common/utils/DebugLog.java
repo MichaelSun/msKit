@@ -4,17 +4,12 @@
 
 package com.plugin.common.utils;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
 import android.text.TextUtils;
 import android.util.Log;
+
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 /**
  * 
@@ -175,7 +170,14 @@ public class DebugLog {
 
 		getInstance().writeLog(DEBUG_TAG, tag, msg, tr);
 		if (DUMP_LOG_TO_CONSOLE) {
-			Log.d(TAG, "[[" + tag + "]]" + msg, tr);
+		//	Log.d(TAG, "[[" + tag + "]]" + msg, tr);
+		    int index = tag.indexOf(".java");
+		    if (index > 0) {
+		        msg = "[[" + tag + "]]" + msg;
+		        tag = tag.substring(0, index); 
+		    }
+			tag = tag.replace("[[", "").replace("]]", "");
+			Log.d(tag, msg, tr);
 		}
 	}
 

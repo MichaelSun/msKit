@@ -10,12 +10,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.plugin.internet.core.RequestBase;
-
 /**
  * 
  * Annotation used for REST request. All Requests inherit from
- * {@link RequestBase} MUST add Annotation (either this or {@link OptionalParam}
+ * {@link com.plugin.internet.core.RequestBase} MUST add Annotation (either this or {@link OptionalParam}
  * ) to their declared fields that should be send to the REST server.
  * 
  * Fields that annotated as RequiredParam will be send to the REST server with

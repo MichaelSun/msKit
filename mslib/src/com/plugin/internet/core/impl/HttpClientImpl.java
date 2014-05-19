@@ -5,14 +5,13 @@
 
 package com.plugin.internet.core.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.HttpVersion;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.text.TextUtils;
+import android.util.Log;
+import com.plugin.internet.core.*;
+import org.apache.http.*;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
@@ -35,321 +34,400 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.util.EntityUtils;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.text.TextUtils;
-import android.util.Log;
-
-import com.plugin.internet.core.HttpClientInterface;
-import com.plugin.internet.core.HttpRequestHookListener;
-import com.plugin.internet.core.InternetConfig;
-import com.plugin.internet.core.InternetStringUtils;
-import com.plugin.internet.core.NetWorkException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 
 class HttpClientImpl implements HttpClientInterface {
-    private static final String TAG = "HttpUtil";
-    private static final boolean DEBUG = InternetConfig.DEBUG;
+	private static final String TAG = "HttpUtil";
+	private static final boolean DEBUG = InternetConfig.DEBUG;
 
-    public static final String HTTP_REQUEST_METHOD_POST = "POST";
+	public static final String HTTP_REQUEST_METHOD_POST = "POST";
 
-    public static final String HTTP_REQUEST_METHOD_GET = "GET";
+	public static final String HTTP_REQUEST_METHOD_GET = "GET";
 
-    private static final int TIMEOUT_DELAY = 30 * 1000;
+	private static final int TIMEOUT_DELAY = 30 * 1000;
 
-    private static final int HTTP_PORT = 80;
+	private static final int HTTP_PORT = 80;
 
-    private static HttpClientImpl instance;
+	private static HttpClientImpl instance;
 
-    private static Object lockObject = new Object();
+	private static Object lockObject = new Object();
 
-    private HttpRequestHookListener mHttpReturnInterface;
+	private HttpRequestHookListener mHttpReturnInterface;
 
-    public static HttpClientImpl getInstance(Context context) {
-        if (instance == null) {
-            synchronized (lockObject) {
-                if (instance == null) {
-                    instance = new HttpClientImpl(context);
-                }
-            }
-        }
-        return instance;
-    }
+	public static HttpClientImpl getInstance(Context context) {
+		if (instance == null) {
+			synchronized (lockObject) {
+				if (instance == null) {
+					instance = new HttpClientImpl(context);
+				}
+			}
+		}
+		return instance;
+	}
 
-    private HttpClientImpl(Context context) {
-        this.mContext = context;
-        this.init();
-    }
+	private HttpClientImpl(Context context) {
+		this.mContext = context;
+		this.init();
+	}
 
-    private Context mContext;
+	private Context mContext;
 
-    private HttpClient httpClient;
-    private HttpClient httpClientByte;
+	private HttpClient httpClient;
+	private HttpClient httpClientByte;
 
-    @Override
-    public void setHttpReturnListener(HttpRequestHookListener l) {
-        mHttpReturnInterface = l;
-    }
+	@Override
+	public void setHttpReturnListener(HttpRequestHookListener l) {
+		mHttpReturnInterface = l;
+	}
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T, V> V getResource(Class<T> inputResourceType, Class<V> retResourceType, String url, String method,
-            HttpEntity entity) {
-        // 大文件下载，图片，语音等
-        HttpRequestBase requestBase = createHttpRequest(url, method, entity);
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T, V> V getResource(Class<T> inputResourceType,
+			Class<V> retResourceType, String url, String method,
+			HttpEntity entity) throws NetWorkException {
+		// 大文件下载，图片，语音等
+		// HttpRequestBase requestBase = createHttpRequest(url, method, entity);
+		//
+		// if (mHttpReturnInterface != null) {
+		// mHttpReturnInterface.onCheckRequestHeaders(url, requestBase);
+		// }
+		//
+		// if (inputResourceType == InputStream.class) {
+		// try {
+		// return (V) getInputStreamResponse(requestBase, url);
+		// } catch (NetWorkException e) {
+		// e.printStackTrace();
+		// }
+		// } else {
+		// throw new RuntimeException("Unknown resoureType :" +
+		// inputResourceType);
+		// }
+		// return null;
+		return getResource(inputResourceType, retResourceType, url, method,
+				entity, null);
+	}
 
-        if (mHttpReturnInterface != null) {
-            mHttpReturnInterface.onCheckRequestHeaders(url, requestBase);
-        }
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T, V> V getResource(Class<T> inputResourceType,
+			Class<V> retResourceType, String url, String method,
+			HttpEntity entity, List<NameValuePair> headers) throws NetWorkException {
+		// 大文件下载，图片，语音等
+		HttpRequestBase requestBase = createHttpRequest(url, method, entity);
 
-        if (inputResourceType == InputStream.class) {
-            try {
-                return (V) getInputStreamResponse(requestBase, url);
-            } catch (NetWorkException e) {
-                e.printStackTrace();
-            }
-        } else {
-            throw new RuntimeException("Unknown resoureType :" + inputResourceType);
-        }
-        return null;
-    }
+		// 增加指定的Header
+		if (headers != null) {
+			for (NameValuePair nvp : headers) {
+				requestBase.addHeader(nvp.getName(), nvp.getValue());
+			}
+		}
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T getResource(Class<T> resourceType, String url, String method, HttpEntity entity) {
+		if (mHttpReturnInterface != null) {
+			mHttpReturnInterface.onCheckRequestHeaders(url, requestBase);
+		}
 
-        HttpRequestBase requestBase = createHttpRequest(url, method, entity);
-        if (resourceType == byte[].class) {
-            try {
-                byte[] ret = getBytesResponse(requestBase);
+		if (inputResourceType == InputStream.class) {
+			return (V) getInputStreamResponse(requestBase, url);
+		} else {
+			throw new RuntimeException("Unknown resoureType :"
+					+ inputResourceType);
+		}
+		// return null;
+	}
 
-//                if (Config.DEBUG_NETWORK_ST && ret != null) {
-//                    String value = DataBaseOperator.getInstance().queryCacheValue(Config.NETWORK_STATISTICS_TYPE,
-//                            Config.NETWORK_STATISTICS_CATEGORY_IMAGE, Config.NETWORK_STATISTICS_DOWN);
-//                    int oldSize = 0;
-//                    if (!TextUtils.isEmpty(value)) {
-//                        oldSize = Integer.valueOf(value);
-//                    }
-//                    oldSize += ret.length;
-//                    DataBaseOperator.getInstance().addCacheValue(Config.NETWORK_STATISTICS_TYPE,
-//                            Config.NETWORK_STATISTICS_CATEGORY_IMAGE, Config.NETWORK_STATISTICS_DOWN,
-//                            String.valueOf(oldSize));
-//                }
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getResource(Class<T> resourceType, String url, String method,
+			HttpEntity entity) {
 
-                return (T) ret;
-            } catch (NetWorkException e) {
-                e.printStackTrace();
-            }
-        } else if (resourceType == String.class) {
-            try {
-                return (T) getStringResponse(requestBase);
-            } catch (NetWorkException e) {
-                e.printStackTrace();
-            }
-        } else {
-            throw new RuntimeException("Unknown resoureType :" + resourceType);
-        }
+		return getResource(resourceType, url, method, entity, null);
+	}
 
-        return null;
-    }
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getResource(Class<T> resourceType, String url, String method,
+			HttpEntity entity, List<NameValuePair> headers) {
 
-    private class StringResponseHandler implements ResponseHandler<String> {
+		HttpRequestBase requestBase = createHttpRequest(url, method, entity);
 
-        @Override
-        public String handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
-            String r = null;
-            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                try {
-                    r = InternetStringUtils.unGzipBytesToString(response.getEntity().getContent()).trim();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            return r;
-        }
-    }
+		// 增加指定的Header
+		if (headers != null) {
+			for (NameValuePair nvp : headers) {
+				requestBase.addHeader(nvp.getName(), nvp.getValue());
+			}
+		}
 
-    private class ByteDataResponseHandler implements ResponseHandler<byte[]> {
+		if (resourceType == byte[].class) {
+			try {
+				byte[] ret = getBytesResponse(requestBase);
 
-        @Override
-        public byte[] handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+				// if (Config.DEBUG_NETWORK_ST && ret != null) {
+				// String value =
+				// DataBaseOperator.getInstance().queryCacheValue(Config.NETWORK_STATISTICS_TYPE,
+				// Config.NETWORK_STATISTICS_CATEGORY_IMAGE,
+				// Config.NETWORK_STATISTICS_DOWN);
+				// int oldSize = 0;
+				// if (!TextUtils.isEmpty(value)) {
+				// oldSize = Integer.valueOf(value);
+				// }
+				// oldSize += ret.length;
+				// DataBaseOperator.getInstance().addCacheValue(Config.NETWORK_STATISTICS_TYPE,
+				// Config.NETWORK_STATISTICS_CATEGORY_IMAGE,
+				// Config.NETWORK_STATISTICS_DOWN,
+				// String.valueOf(oldSize));
+				// }
 
-            byte[] data = EntityUtils.toByteArray(response.getEntity());
-            return data;
-        }
+				return (T) ret;
+			} catch (NetWorkException e) {
+				e.printStackTrace();
+			}
+		} else if (resourceType == String.class) {
+			try {
+				return (T) getStringResponse(requestBase);
+			} catch (NetWorkException e) {
+				e.printStackTrace();
+			}
+		} else {
+			throw new RuntimeException("Unknown resoureType :" + resourceType);
+		}
 
-    }
+		return null;
+	}
 
-    private class StreamResponseHandler implements ResponseHandler<String> {
+	private class StringResponseHandler implements ResponseHandler<String> {
 
-        private String mRequestUrl;
+		@Override
+		public String handleResponse(HttpResponse response)
+				throws ClientProtocolException, IOException {
+			String r = null;
+			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+				try {
+					r = InternetStringUtils.unGzipBytesToString(
+							response.getEntity().getContent()).trim();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			return r;
+		}
+	}
 
-        StreamResponseHandler(String url) {
-            mRequestUrl = url;
-        }
+	private class ByteDataResponseHandler implements ResponseHandler<byte[]> {
 
-        @Override
-        public String handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
-            InputStream is = response.getEntity().getContent();
-            String ret = null;
-            if (mHttpReturnInterface != null) {
-                ret = mHttpReturnInterface.onInputStreamReturn(mRequestUrl, is);
-            } else {
-                throw new IOException("can't find HttpReturnInterface Impl");
-            }
+		@Override
+		public byte[] handleResponse(HttpResponse response)
+				throws ClientProtocolException, IOException {
 
-            return ret;
-        }
+			byte[] data = EntityUtils.toByteArray(response.getEntity());
+			return data;
+		}
 
-    }
+	}
 
-    private void init() {
-        httpClient = createHttpClient();
-        httpClientByte = createHttpClientByte();
-    }
+	private class StreamResponseHandler implements ResponseHandler<String> {
 
-    private DefaultHttpClient createHttpClientByte() {
-        final SchemeRegistry supportedSchemes = new SchemeRegistry();
-        supportedSchemes.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), HTTP_PORT));
-        supportedSchemes.register(new Scheme("https", EasySSLSocketFactory.getSocketFactory(), 443));
-        final HttpParams httpParams = createHttpParams();
-        final ThreadSafeClientConnManager tccm = new ThreadSafeClientConnManager(httpParams, supportedSchemes);
-        DefaultHttpClient client = new DefaultHttpClient(tccm, httpParams);
-        client.setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(0, false));
-        return client;
-    }
+		private String mRequestUrl;
 
-    private DefaultHttpClient createHttpClient() {
-        final SchemeRegistry supportedSchemes = new SchemeRegistry();
-        supportedSchemes.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-        supportedSchemes.register(new Scheme("https", EasySSLSocketFactory.getSocketFactory(), 443));
-        final HttpParams httpParams = createHttpParams();
-        final ThreadSafeClientConnManager tccm = new ThreadSafeClientConnManager(httpParams, supportedSchemes);
-        DefaultHttpClient client = new DefaultHttpClient(tccm, httpParams);
-        client.setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(0, false));
-        return client;
-    }
+		StreamResponseHandler(String url) {
+			mRequestUrl = url;
+		}
 
-    private HttpParams createHttpParams() {
-        final HttpParams params = new BasicHttpParams();
-        HttpConnectionParams.setStaleCheckingEnabled(params, true);
-        HttpConnectionParams.setConnectionTimeout(params, TIMEOUT_DELAY);
-        HttpConnectionParams.setSoTimeout(params, TIMEOUT_DELAY);
-        HttpConnectionParams.setSocketBufferSize(params, 8192);
-        HttpConnectionParams.setTcpNoDelay(params, true);
-        HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
-        HttpProtocolParams.setUseExpectContinue(params, false);
-        HttpClientParams.setRedirecting(params, false);
-        ConnManagerParams.setMaxTotalConnections(params, 50);
-        ConnManagerParams.setTimeout(params, TIMEOUT_DELAY);
-        ConnManagerParams.setMaxConnectionsPerRoute(params, new ConnPerRouteBean(20));
-        return params;
-    }
+		@Override
+		public String handleResponse(HttpResponse response)
+				throws ClientProtocolException, IOException {
+			if (response != null
+					&& response.getStatusLine() != null
+					&& !String
+							.valueOf(response.getStatusLine().getStatusCode())
+							.startsWith("2")) {
+				throw new IOException(
+						"exception happend when getting response. StatusCode="
+								+ response.getStatusLine().getStatusCode());
+			}
 
-    private HttpRequestBase createHttpRequest(String url, String method, HttpEntity entity) {
-        checkParams(url, method);
-        HttpRequestBase httpRequest = null;
-        if (method.equalsIgnoreCase(HTTP_REQUEST_METHOD_GET)) {
-            httpRequest = new HttpGet(url);
-        } else {
-            httpRequest = new HttpPost(url);
-            if (entity != null) {
-                ((HttpPost) httpRequest).setEntity(entity);
-            }
-        }
+			InputStream is = response.getEntity().getContent();
+			String ret = null;
+			if (mHttpReturnInterface != null) {
+				ret = mHttpReturnInterface.onInputStreamReturn(mRequestUrl, is);
+			} else {
+				throw new IOException("can't find HttpReturnInterface Impl");
+			}
 
-        HttpHost host = HttpProxy.getProxyHttpHost(mContext);
-        if (host != null) {
-            httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, host);
-            httpClientByte.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, host);
-        } else {
-            httpClient.getParams().removeParameter(ConnRoutePNames.DEFAULT_PROXY);
-        }
-        return httpRequest;
-    }
+			return ret;
+		}
+	}
 
-    private void checkParams(String url, String method) throws IllegalArgumentException {
-        if (TextUtils.isEmpty(url)) {
-            throw new IllegalArgumentException("Request url MUST NOT be null");
-        }
-        if (TextUtils.isEmpty(method)) {
-            throw new IllegalArgumentException("Request method MUST NOT be null");
-        } else {
-            if (!method.equalsIgnoreCase(HTTP_REQUEST_METHOD_GET) && !method.equalsIgnoreCase(HTTP_REQUEST_METHOD_POST)) {
-                throw new IllegalArgumentException("Only support GET and POST");
-            }
-        }
-    }
+	private void init() {
+		httpClient = createHttpClient();
+		httpClientByte = createHttpClientByte();
+	}
 
-    private void preExecuteHttpRequest() {
-        httpClient.getConnectionManager().closeExpiredConnections();
-    }
+	private DefaultHttpClient createHttpClientByte() {
+		final SchemeRegistry supportedSchemes = new SchemeRegistry();
+		supportedSchemes.register(new Scheme("http", PlainSocketFactory
+				.getSocketFactory(), HTTP_PORT));
+		supportedSchemes.register(new Scheme("https", EasySSLSocketFactory
+				.getSocketFactory(), 443));
+		final HttpParams httpParams = createHttpParams();
+		final ThreadSafeClientConnManager tccm = new ThreadSafeClientConnManager(
+				httpParams, supportedSchemes);
+		DefaultHttpClient client = new DefaultHttpClient(tccm, httpParams);
+		client.setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(0,
+				false));
+		return client;
+	}
 
-    private void onExecuteException(HttpRequestBase httpRequest) {
-        httpRequest.abort();
-    }
+	private DefaultHttpClient createHttpClient() {
+		final SchemeRegistry supportedSchemes = new SchemeRegistry();
+		supportedSchemes.register(new Scheme("http", PlainSocketFactory
+				.getSocketFactory(), 80));
+		supportedSchemes.register(new Scheme("https", EasySSLSocketFactory
+				.getSocketFactory(), 443));
+		final HttpParams httpParams = createHttpParams();
+		final ThreadSafeClientConnManager tccm = new ThreadSafeClientConnManager(
+				httpParams, supportedSchemes);
+		DefaultHttpClient client = new DefaultHttpClient(tccm, httpParams);
+		client.setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(0,
+				false));
+		return client;
+	}
 
-    private String getInputStreamResponse(HttpRequestBase httpRequest, String url) throws NetWorkException {
-        try {
-            preExecuteHttpRequest();
-            StreamResponseHandler handler = new StreamResponseHandler(url);
-            return httpClientByte.execute(httpRequest, handler);
-        } catch (Exception e) {
-            onExecuteException(httpRequest);
-            throw new NetWorkException(NetWorkException.NETWORK_ERROR, "网络连接错误", e.toString());
-        }
-    }
+	private HttpParams createHttpParams() {
+		final HttpParams params = new BasicHttpParams();
+		HttpConnectionParams.setStaleCheckingEnabled(params, true);
+		HttpConnectionParams.setConnectionTimeout(params, TIMEOUT_DELAY);
+		HttpConnectionParams.setSoTimeout(params, TIMEOUT_DELAY);
+		HttpConnectionParams.setSocketBufferSize(params, 8192);
+		HttpConnectionParams.setTcpNoDelay(params, true);
+		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
+		HttpProtocolParams.setUseExpectContinue(params, false);
+		HttpClientParams.setRedirecting(params, false);
+		ConnManagerParams.setMaxTotalConnections(params, 50);
+		ConnManagerParams.setTimeout(params, TIMEOUT_DELAY);
+		ConnManagerParams.setMaxConnectionsPerRoute(params,
+				new ConnPerRouteBean(20));
+		return params;
+	}
 
-    private byte[] getBytesResponse(HttpRequestBase httpRequest) throws NetWorkException {
-        try {
-            preExecuteHttpRequest();
-            ByteDataResponseHandler handler = new ByteDataResponseHandler();
-            return httpClientByte.execute(httpRequest, handler);
-        } catch (Exception e) {
-            onExecuteException(httpRequest);
-            throw new NetWorkException(NetWorkException.NETWORK_ERROR, "网络连接错误", e.toString());
-        }
-    }
+	private HttpRequestBase createHttpRequest(String url, String method,
+			HttpEntity entity) {
+		checkParams(url, method);
+		HttpRequestBase httpRequest = null;
+		if (method.equalsIgnoreCase(HTTP_REQUEST_METHOD_GET)) {
+			httpRequest = new HttpGet(url);
+		} else {
+			httpRequest = new HttpPost(url);
+			if (entity != null) {
+				((HttpPost) httpRequest).setEntity(entity);
+			}
+		}
 
-    private String getStringResponse(HttpRequestBase httpRequest) throws NetWorkException {
-        try {
-            preExecuteHttpRequest();
-            StringResponseHandler handler = new StringResponseHandler();
-            return httpClient.execute(httpRequest, handler);
-        } catch (Exception e) {
-            onExecuteException(httpRequest);
-            throw new NetWorkException(NetWorkException.NETWORK_ERROR, "网络连接错误", e.toString());
-        }
-    }
+		HttpHost host = HttpProxy.getProxyHttpHost(mContext);
+		if (host != null) {
+			httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
+					host);
+			httpClientByte.getParams().setParameter(
+					ConnRoutePNames.DEFAULT_PROXY, host);
+		} else {
+			httpClient.getParams().removeParameter(
+					ConnRoutePNames.DEFAULT_PROXY);
+		}
+		return httpRequest;
+	}
 
-    public boolean isNetworkAvailable() {
-        if (mContext == null) {
-            LOGD("[[checkNetworkAvailable]] check context null");
-            return false;
-        }
+	private void checkParams(String url, String method)
+			throws IllegalArgumentException {
+		if (TextUtils.isEmpty(url)) {
+			throw new IllegalArgumentException("Request url MUST NOT be null");
+		}
+		if (TextUtils.isEmpty(method)) {
+			throw new IllegalArgumentException(
+					"Request method MUST NOT be null");
+		} else {
+			if (!method.equalsIgnoreCase(HTTP_REQUEST_METHOD_GET)
+					&& !method.equalsIgnoreCase(HTTP_REQUEST_METHOD_POST)) {
+				throw new IllegalArgumentException("Only support GET and POST");
+			}
+		}
+	}
 
-        ConnectivityManager connectivity = (ConnectivityManager) mContext
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (connectivity == null) {
-            LOGD("[[checkNetworkAvailable]] connectivity null");
-            return false;
-        }
+	private void preExecuteHttpRequest() {
+		httpClient.getConnectionManager().closeExpiredConnections();
+	}
 
-        NetworkInfo[] info = connectivity.getAllNetworkInfo();
-        if (info != null) {
-            for (int i = 0; i < info.length; i++) {
-                if (info[i].getState() == NetworkInfo.State.CONNECTED) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+	private void onExecuteException(HttpRequestBase httpRequest) {
+		httpRequest.abort();
+	}
 
-    private static final void LOGD(String msg) {
-        if (DEBUG) {
-            Log.d(TAG, msg);
-        }
-    }
+	private String getInputStreamResponse(HttpRequestBase httpRequest,
+			String url) throws NetWorkException {
+		try {
+			preExecuteHttpRequest();
+			StreamResponseHandler handler = new StreamResponseHandler(url);
+			return httpClientByte.execute(httpRequest, handler);
+		} catch (Exception e) {
+			onExecuteException(httpRequest);
+			throw new NetWorkException(NetWorkException.NETWORK_ERROR,
+					"网络连接错误", e.toString());
+		}
+	}
+
+	private byte[] getBytesResponse(HttpRequestBase httpRequest)
+			throws NetWorkException {
+		try {
+			preExecuteHttpRequest();
+			ByteDataResponseHandler handler = new ByteDataResponseHandler();
+			return httpClientByte.execute(httpRequest, handler);
+		} catch (Exception e) {
+			onExecuteException(httpRequest);
+			throw new NetWorkException(NetWorkException.NETWORK_ERROR,
+					"网络连接错误", e.toString());
+		}
+	}
+
+	private String getStringResponse(HttpRequestBase httpRequest)
+			throws NetWorkException {
+		try {
+			preExecuteHttpRequest();
+			StringResponseHandler handler = new StringResponseHandler();
+			return httpClient.execute(httpRequest, handler);
+		} catch (Exception e) {
+			onExecuteException(httpRequest);
+			throw new NetWorkException(NetWorkException.NETWORK_ERROR,
+					"网络连接错误", e.toString());
+		}
+	}
+
+	public boolean isNetworkAvailable() {
+		if (mContext == null) {
+			LOGD("[[checkNetworkAvailable]] check context null");
+			return false;
+		}
+
+		ConnectivityManager connectivity = (ConnectivityManager) mContext
+				.getSystemService(Context.CONNECTIVITY_SERVICE);
+		if (connectivity == null) {
+			LOGD("[[checkNetworkAvailable]] connectivity null");
+			return false;
+		}
+
+		NetworkInfo[] info = connectivity.getAllNetworkInfo();
+		if (info != null) {
+			for (int i = 0; i < info.length; i++) {
+				if (info[i].getState() == NetworkInfo.State.CONNECTED) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private static final void LOGD(String msg) {
+		if (DEBUG) {
+			Log.d(TAG, msg);
+		}
+	}
 
 }

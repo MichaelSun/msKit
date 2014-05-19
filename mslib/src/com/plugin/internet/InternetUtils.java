@@ -1,17 +1,13 @@
 package com.plugin.internet;
 
-import java.io.InputStream;
-import java.util.Map;
-
 import android.content.Context;
-
-import com.plugin.internet.core.BeanRequestInterface;
-import com.plugin.internet.core.HttpConnectHookListener;
-import com.plugin.internet.core.HttpRequestHookListener;
-import com.plugin.internet.core.NetWorkException;
-import com.plugin.internet.core.RequestBase;
+import com.plugin.internet.core.*;
 import com.plugin.internet.core.impl.BeanRequestFactory;
 import com.plugin.internet.core.impl.HttpClientFactory;
+import org.apache.http.NameValuePair;
+
+import java.io.InputStream;
+import java.util.List;
 
 public class InternetUtils {
 
@@ -26,7 +22,7 @@ public class InternetUtils {
 	 * @param request
 	 *            REST请求
 	 * @return REST返回
-	 * @throws NetWorkException
+	 * @throws com.plugin.internet.core.NetWorkException
 	 */
 	public static <T> T request(Context context, RequestBase<T> request) throws NetWorkException {
 		if (context != null && BeanRequestFactory.createBeanRequestInterface(context.getApplicationContext()) != null) {
@@ -47,20 +43,37 @@ public class InternetUtils {
 
 	/**
 	 * 大文件下载接口
-	 * 
+	 *
 	 * @param context
 	 * @param imageUrl
 	 * @return
-	 * @throws NetWorkException
+	 * @throws com.plugin.internet.core.NetWorkException
 	 */
-	public static String requestBigResourceWithCache(Context context, String imageUrl) throws NetWorkException {
+	public static String requestBigResourceWithCache(Context context, String imageUrl, List<NameValuePair> headers) throws NetWorkException {
 		if (context != null && HttpClientFactory.createHttpClientInterface(context.getApplicationContext()) != null) {
 			return HttpClientFactory.createHttpClientInterface(context.getApplicationContext()).getResource(
-					InputStream.class, String.class, imageUrl, "GET", null);
+					InputStream.class, String.class, imageUrl, "GET", null, headers);
 		}
 
 		return null;
 	}
+
+    /**
+     * 大文件下载接口
+     *
+     * @param context
+     * @param imageUrl
+     * @return
+     * @throws com.plugin.internet.core.NetWorkException
+     */
+    public static String requestBigResourceWithCache(Context context, String imageUrl) throws NetWorkException {
+        if (context != null && HttpClientFactory.createHttpClientInterface(context.getApplicationContext()) != null) {
+            return HttpClientFactory.createHttpClientInterface(context.getApplicationContext()).getResource(
+                                                                                                               InputStream.class, String.class, imageUrl, "GET", null);
+        }
+
+        return null;
+    }
 
 //	public static void setHttpAdditionalInfo(Context context, Map<String, String> AdditionalInfo) {
 //		if (context != null && BeanRequestFactory.createBeanRequestInterface(context.getApplicationContext()) != null) {

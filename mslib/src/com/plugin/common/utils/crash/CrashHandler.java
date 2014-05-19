@@ -1,19 +1,5 @@
 package com.plugin.common.utils.crash;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.lang.Thread.UncaughtExceptionHandler;
-import java.lang.reflect.Field;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -22,7 +8,6 @@ import android.os.Build;
 import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
-
 import com.plugin.common.utils.CustomThreadPool;
 import com.plugin.common.utils.CustomThreadPool.TaskWrapper;
 import com.plugin.common.utils.DebugLog;
@@ -30,6 +15,16 @@ import com.plugin.common.utils.UtilsRuntime;
 import com.plugin.common.utils.files.DiskManager;
 import com.plugin.common.utils.files.DiskManager.DiskCacheType;
 import com.plugin.common.utils.files.FileInfo;
+
+import java.io.*;
+import java.lang.Thread.UncaughtExceptionHandler;
+import java.lang.reflect.Field;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 public final class CrashHandler implements UncaughtExceptionHandler {
 
@@ -49,7 +44,7 @@ public final class CrashHandler implements UncaughtExceptionHandler {
     private static final String TAG = "CrashHandler";
     private String CRASH_DIR;
 
-    private Thread.UncaughtExceptionHandler mDefaultHandler;
+    private UncaughtExceptionHandler mDefaultHandler;
     private static CrashHandler INSTANCE = new CrashHandler();
     private Context mContext;
     private Map<String, String> infos = new HashMap<String, String>();

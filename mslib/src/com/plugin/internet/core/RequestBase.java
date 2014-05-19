@@ -5,36 +5,28 @@
 
 package com.plugin.internet.core;
 
-import java.io.File;
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import com.plugin.internet.core.annotations.*;
+import org.apache.http.NameValuePair;
 
-import com.plugin.internet.core.annotations.HttpMethod;
-import com.plugin.internet.core.annotations.IgnoreValue;
-import com.plugin.internet.core.annotations.NeedTicket;
-import com.plugin.internet.core.annotations.NoNeedTicket;
-import com.plugin.internet.core.annotations.OptionalParam;
-import com.plugin.internet.core.annotations.OptionalTicket;
-import com.plugin.internet.core.annotations.RequiredParam;
-import com.plugin.internet.core.annotations.RestMethodExtUrlParam;
-import com.plugin.internet.core.annotations.RestMethodUrl;
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.List;
 
 /**
  * 
  * All Requests inherit from this MUST add Annotation (either
- * {@link RequiredParam} or {@link OptionalParam}) to their declared fields that
+ * {@link com.plugin.internet.core.annotations.RequiredParam} or {@link com.plugin.internet.core.annotations.OptionalParam}) to their declared fields that
  * should be send to the REST server.
- * 
+ *
  * Note : 1.Follow field should not be declared in Requests: api_key call_id sig
  * session_key format 2.REST version is set to "1.0" by default,
- * 
- * @see RequiredParam
- * @see OptionalParam
+ *
+ * @see com.plugin.internet.core.annotations.RequiredParam
+ * @see com.plugin.internet.core.annotations.OptionalParam
  * 
  * @param <T>
  */
@@ -209,6 +201,10 @@ public abstract class RequestBase<T> {
         if (DEBUG) {
             Log.d(this.getClass().getName(), message);
         }
+    }
+
+    public List<NameValuePair> getHeaders() {
+        return null;
     }
 
     /**

@@ -11,8 +11,8 @@ public class JsonErrorResponse extends ResponseBase {
 	public String errorMsg;
 
 	@JsonCreator
-	public JsonErrorResponse(@JsonProperty("code") int code,
-			@JsonProperty("data") String data) {
+	public JsonErrorResponse(@JsonProperty("errorCode") int code,
+			@JsonProperty("errorMsg") String data) {
 		this.errorCode = code;
 		this.errorMsg = data;
 	}

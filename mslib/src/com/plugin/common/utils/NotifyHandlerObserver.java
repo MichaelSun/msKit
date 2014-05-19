@@ -1,11 +1,11 @@
 package com.plugin.common.utils;
 
+import android.os.Handler;
+import android.os.Message;
+
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import android.os.Handler;
-import android.os.Message;
 
 public class NotifyHandlerObserver {
     private static final String TAG = "NotifyHandler";

@@ -1,8 +1,8 @@
 package com.plugin.internet.core;
 
-import java.util.Map;
-
 import android.os.Bundle;
+
+import java.util.Map;
 
 public interface BeanRequestInterface {
 

@@ -1,19 +1,8 @@
 package com.plugin.common.utils.files;
 
-import android.content.Context;
-import android.os.Handler;
-import android.text.TextUtils;
-import com.plugin.common.utils.*;
-import com.plugin.common.utils.CustomThreadPool.TaskWrapper;
-import com.plugin.common.utils.CustomThreadPool.ThreadPoolSnapShot;
-import com.plugin.common.utils.files.DiskManager.DiskCacheType;
-import com.plugin.common.utils.image.ImageDownloader;
-import com.plugin.internet.InternetUtils;
-import com.plugin.internet.core.HttpRequestHookListener;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpRequestBase;
-
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -22,10 +11,33 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.message.BasicNameValuePair;
+
+import android.content.Context;
+import android.os.Handler;
+import android.text.TextUtils;
+
+import com.plugin.common.utils.CustomThreadPool;
+import com.plugin.common.utils.CustomThreadPool.TaskWrapper;
+import com.plugin.common.utils.CustomThreadPool.ThreadPoolSnapShot;
+import com.plugin.common.utils.Destroyable;
+import com.plugin.common.utils.NotifyHandlerObserver;
+import com.plugin.common.utils.SingleInstanceBase;
+import com.plugin.common.utils.StringUtils;
+import com.plugin.common.utils.UtilsConfig;
+import com.plugin.common.utils.UtilsRuntime;
+import com.plugin.common.utils.files.DiskManager.DiskCacheType;
+import com.plugin.internet.InternetUtils;
+import com.plugin.internet.core.HttpRequestHookListener;
+
 public class FileDownloader extends SingleInstanceBase implements Runnable,
 		Destroyable, HttpRequestHookListener {
 
 	private static final String TAG = FileDownloader.class.getSimpleName();
+
 	protected static final boolean DEBUG = true & UtilsConfig.UTILS_DEBUG;
 
 	protected static final boolean SUPPORT_RANGED = true;
@@ -35,19 +47,19 @@ public class FileDownloader extends SingleInstanceBase implements Runnable,
 	protected String INPUT_STREAM_CACHE_PATH = null;
 	protected String DOWNLOADED_FILE_DIR = null;
 
-	//默认为后进先下载
+	// 默认为后进先下载
 	protected boolean mLastInFirstDownload = true;
 
 	/**
 	 * 当下载一个文件的时候，通过一个URL生成下载文件的本地的文件名字
-	 *
+	 * 
 	 * @author michael
-	 *
+	 * 
 	 */
 	public static interface DownloadFilenameCreateListener {
 		/**
 		 * 为一个下载URL生成本地的文件路径，注意：要保证生成文件名字的唯一性 生成的文件会下载到 big_file_cache 文件夹下面
-		 *
+		 * 
 		 * @param downloadUrl
 		 * @return
 		 */
@@ -127,6 +139,7 @@ public class FileDownloader extends SingleInstanceBase implements Runnable,
 		protected DOWNLOAD_TYPE mType;
 		protected int mStatus;
 		protected String mFileExtension; // 下载文件的扩展名
+		protected List<NameValuePair> mHeaders = new LinkedList<NameValuePair>(); // 下载请求需要包含的头部
 
 		protected AtomicBoolean requestIsOperating = new AtomicBoolean(false);
 
@@ -154,6 +167,46 @@ public class FileDownloader extends SingleInstanceBase implements Runnable,
 				String fileExtension) {
 			this(type, downloadUrl);
 			mFileExtension = fileExtension;
+		}
+
+		public List<NameValuePair> getHeaders() {
+			return mHeaders;
+		}
+
+		private void addHeader(String name, String value) {
+			mHeaders.add(new BasicNameValuePair(name, value));
+		}
+
+		public static class Builder {
+			DownloadRequest mRequest;
+
+			public Builder(String downloadUrl) {
+				mRequest = new DownloadRequest(downloadUrl);
+				mRequest.mStatus = STATUS_NORMAL;
+				mRequest.mUrlHashCode = downloadUrl == null ? 0 : downloadUrl
+						.hashCode();
+			}
+
+			public DownloadRequest create() {
+				return mRequest;
+			}
+
+			public Builder setDownloadType(DOWNLOAD_TYPE type) {
+				mRequest.mType = type;
+				return this;
+			}
+
+			public Builder setExtension(String ext) {
+				mRequest.mFileExtension = ext;
+				return this;
+			}
+
+			public Builder addHeader(String name, String value) {
+				if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(value)) {
+					mRequest.addHeader(name, value);
+				}
+				return this;
+			}
 		}
 
 		public void cancelDownload() {
@@ -282,7 +335,7 @@ public class FileDownloader extends SingleInstanceBase implements Runnable,
 
 	/**
 	 * 设置下载文件的存储路径
-	 *
+	 * 
 	 * @param dirFullPath
 	 */
 	public void setDownloadDir(String dirFullPath) {
@@ -403,20 +456,21 @@ public class FileDownloader extends SingleInstanceBase implements Runnable,
 		// 检查是否已经下载过此request对应的文件
 		String cachedFile = checkFromCache(request);
 		if (!TextUtils.isEmpty(cachedFile)) {
-            File file = new File(cachedFile);
-            if (file.exists()) {
-                DownloadResponse response = tryToHandleDownloadFile(cachedFile, request);
-                if (response != null) {
-                    mSuccessHandler.notifyAll(-1, -1, response);
-                    handleProcess(request.mDownloadUrl, (int) file.length(),
-                                     (int) file.length());
-                    if (l != null) {
-                        handleResponseByListener(DOWNLOAD_SUCCESS,
-                                                    request.mDownloadUrl, response, false);
-                    }
-                }
-                return true;
-            }
+			File file = new File(cachedFile);
+			if (file.exists()) {
+				DownloadResponse response = tryToHandleDownloadFile(cachedFile,
+						request);
+				if (response != null) {
+					mSuccessHandler.notifyAll(-1, -1, response);
+					handleProcess(request.mDownloadUrl, (int) file.length(),
+							(int) file.length());
+					if (l != null) {
+						handleResponseByListener(DOWNLOAD_SUCCESS,
+								request.mDownloadUrl, response, false);
+					}
+				}
+				return true;
+			}
 		}
 
 		return postRequest(request);
@@ -424,6 +478,7 @@ public class FileDownloader extends SingleInstanceBase implements Runnable,
 
 	/**
 	 * 新提交的request会默认
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -441,16 +496,17 @@ public class FileDownloader extends SingleInstanceBase implements Runnable,
 		// 检查是否已经下载过此request对应的文件
 		String cachedFile = checkFromCache(request);
 		if (!TextUtils.isEmpty(cachedFile)) {
-            File file = new File(cachedFile);
-            if (file.exists()) {
-                DownloadResponse response = tryToHandleDownloadFile(cachedFile, request);
-                if (response != null) {
-                    mSuccessHandler.notifyAll(-1, -1, response);
-                    handleProcess(request.mDownloadUrl, (int) file.length(),
-                                     (int) file.length());
-                }
-                return true;
-            }
+			File file = new File(cachedFile);
+			if (file.exists()) {
+				DownloadResponse response = tryToHandleDownloadFile(cachedFile,
+						request);
+				if (response != null) {
+					mSuccessHandler.notifyAll(-1, -1, response);
+					handleProcess(request.mDownloadUrl, (int) file.length(),
+							(int) file.length());
+				}
+				return true;
+			}
 		}
 
 		synchronized (mRequestList) {
@@ -479,7 +535,7 @@ public class FileDownloader extends SingleInstanceBase implements Runnable,
 
 			ThreadPoolSnapShot tss = CustomThreadPool.getInstance()
 					.getSpecialThreadSnapShot(
-							ImageDownloader.class.getSimpleName());
+							FileDownloader.class.getSimpleName());
 			if (tss == null) {
 				return false;
 			} else {
@@ -591,10 +647,10 @@ public class FileDownloader extends SingleInstanceBase implements Runnable,
 
 	@Override
 	public String onInputStreamReturn(String requestUrl, InputStream is) {
-		if (!UtilsRuntime.isSDCardReady()) {
-			UtilsConfig.LOGD("return because unmount the sdcard");
-			return null;
-		}
+		// if (!UtilsRuntime.isSDCardReady()) {
+		// UtilsConfig.LOGD("return because unmount the sdcard");
+		// return null;
+		// }
 
 		if (DEBUG) {
 			UtilsConfig.LOGD("");
@@ -647,7 +703,6 @@ public class FileDownloader extends SingleInstanceBase implements Runnable,
 			int len;
 			OutputStream os = null;
 			boolean isClosed = false;
-
 			try {
 				if (f.exists()) {
 					downloadSize = f.length();
@@ -784,7 +839,7 @@ public class FileDownloader extends SingleInstanceBase implements Runnable,
 
 					String cacheFile = InternetUtils
 							.requestBigResourceWithCache(mContext,
-									request.mDownloadUrl);
+									request.mDownloadUrl, request.getHeaders());
 
 					if (DEBUG) {
 						UtilsConfig.LOGD("----- after get the cache file : "
@@ -839,6 +894,7 @@ public class FileDownloader extends SingleInstanceBase implements Runnable,
 					UtilsConfig.LOGD("Exception : ", e);
 					UtilsConfig.LOGD("exception end operate one request : "
 							+ request);
+					UtilsConfig.LOGD(e.getStackTrace().toString());
 				}
 
 				if (request.getmStatus() != DownloadRequest.STATUS_CANCEL) {
@@ -866,8 +922,7 @@ public class FileDownloader extends SingleInstanceBase implements Runnable,
 				for (DownloadListenerObj d : mListenerList) {
 					if (d.code == curCode) {
 						if (!ignoreNotify) {
-							d.mDownloadListener.onDownloadFinished(status,
-									notfiyObj);
+							d.mDownloadListener.onDownloadFinished(status, notfiyObj);
 						}
 						removeObj.add(d);
 					}
@@ -909,9 +964,9 @@ public class FileDownloader extends SingleInstanceBase implements Runnable,
 	private void handleProcess(String requestUrl, int fileSize, int downloadSize) {
 		int hashCode = requestUrl.hashCode();
 		for (DownloadListenerObj l : mListenerList) {
-			if (l.code == hashCode && l.mDownloadListener != null) {
-				// TODO: should lock the add by main thread and sub thread
-				l.mDownloadListener.onDownloadProcess(fileSize, downloadSize);
+		    if (l.code == hashCode && l.mDownloadListener != null) {
+					// TODO: should lock the add by main thread and sub thread
+					l.mDownloadListener.onDownloadProcess(fileSize, downloadSize);
 			}
 		}
 	}
@@ -945,12 +1000,13 @@ public class FileDownloader extends SingleInstanceBase implements Runnable,
 
 	/**
 	 * 将下载好的文件从缓存目录移动到下载完成的目录
-	 *
+	 * 
 	 * @param cachedFile
 	 * @param extension
 	 * @return
 	 */
 	private String mvFileToDownloadedDir(String cachedFile, String extension) {
+		UtilsConfig.LOGD("----- move cached file to + " + DOWNLOADED_FILE_DIR);
 		File dir = new File(DOWNLOADED_FILE_DIR);
 		if (!dir.exists() || !dir.isDirectory()) {
 			dir.delete();
@@ -961,13 +1017,43 @@ public class FileDownloader extends SingleInstanceBase implements Runnable,
 		String ext = TextUtils.isEmpty(extension) ? "" : "." + extension;
 		File newFile = new File(dir.getAbsolutePath() + "/" + file.getName()
 				+ ext);
-		if (file.renameTo(newFile)) {
+//		// 重命名成功
+		if (UtilsRuntime.isExternalStorageAvailable() && file.renameTo(newFile)) {
 			UtilsConfig.LOGD("----- move cached file to + "
-					+ newFile.getAbsolutePath() + " successfully =======");
+					+ newFile.getAbsolutePath()
+					+ " successfully InstallApp=======");
 			return newFile.getAbsolutePath();
 		}
-		UtilsConfig.LOGD("----- move cached file to + "
-				+ newFile.getAbsolutePath() + " failed =======");
+
+		// 如果重命名失败，则通过拷贝实现
+
+		InputStream is = null;
+		OutputStream os = null;
+		try {
+			is = new FileInputStream(file);
+			os = null;
+			if(dir.getAbsolutePath().startsWith("/data/data")) {
+				UtilsConfig.LOGD("open world readable file"
+						+ " successfully InstallApp=======" + file.getName() + ext);
+				os = mContext
+				.openFileOutput(file.getName() + ext, Context.MODE_WORLD_READABLE);
+			} else {
+				UtilsConfig.LOGD("new FileOutputStream, InstallApp");
+				os = new FileOutputStream(newFile);
+			}
+			UtilsConfig.LOGD("----- move cached file to + "
+					+ newFile.getAbsolutePath()
+					+ " successfully InstallApp=======");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		if (FileUtil.copy(is, os)) {
+			file.delete();
+			return newFile.getAbsolutePath();
+		}
+
 		return null;
 	}
 
