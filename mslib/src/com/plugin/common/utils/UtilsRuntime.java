@@ -141,8 +141,8 @@ public final class UtilsRuntime {
 	
 	public static boolean isExternalStorageAvailable() {
 		String state = Environment.getExternalStorageState();
-		boolean externalStorageAvailable = false;
-		boolean externalStorageWriteable = false;
+		boolean externalStorageAvailable;
+		boolean externalStorageWriteable;
 
 		if (Environment.MEDIA_MOUNTED.equals(state)) {
 			// We can read and write the media
